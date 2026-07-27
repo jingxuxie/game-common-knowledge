@@ -3,7 +3,8 @@
 The repository provides two manuscript entry points:
 
 - `preprint.tex` builds locally with a standard TeX installation and is the
-  checked-in seven-page review draft.
+  checked-in eight-page review draft. The technical discussion ends on page 7;
+  the remaining space is used only for references.
 - `main.tex` is the anonymous AAAI-27 entry point. It must be compiled with the
   **official, unmodified** `aaai2027.sty` and `aaai2027.bst` from the current
   AAAI-27 Author Kit.
