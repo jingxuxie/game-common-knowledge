@@ -33,6 +33,7 @@
 - [x] Seven-page-focused main manuscript plus separate supplement.
 - [x] External PDF figures; no TikZ/pgfplots dependency.
 - [x] No `hyperref`, geometry, balance, or spacing hacks in AAAI source.
+- [x] AI-assisted development disclosure included in the manuscript.
 - [ ] Replace/check `aaai2027.sty` and `aaai2027.bst` against the latest official Author Kit immediately before submission.
 - [ ] Compile with PDFLaTeX and inspect the official-format page count.
 - [x] Run `pdffonts` on the checked-in preprint and supplement; all fonts embedded and no Type 3 fonts.
