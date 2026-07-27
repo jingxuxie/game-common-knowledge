@@ -2,9 +2,10 @@
 
 The repository provides two manuscript entry points:
 
-- `preprint.tex` builds locally with a standard TeX installation and is the
-  checked-in eight-page review draft. The technical discussion ends on page 7;
-  the remaining space is used only for references.
+- `preprint.tex` generates the eight-page review draft. The technical discussion
+  ends on page 7, and the remaining space is used only for references. GitHub
+  Actions rebuilds the PDF from source and publishes the exact compiled files in
+  the `common-knowledge-artifact` workflow artifact.
 - `main.tex` is the anonymous AAAI-27 entry point. It must be compiled with the
   **official, unmodified** `aaai2027.sty` and `aaai2027.bst` from the current
   AAAI-27 Author Kit.
