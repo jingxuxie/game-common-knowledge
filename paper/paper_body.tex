@@ -1,0 +1,260 @@
+\begin{abstract}
+Decentralized agents may possess informative private observations yet fail to coordinate because the distinctions that matter for joint action are not commonly known. We introduce \emph{Budgeted Public Observation Design}: a system designer selects a cost-constrained subset of state features to broadcast, after which agents execute decentralized policies conditioned on private and public information. The team value is monotone in the public feature set, but we show that its structure can be maximally non-benign: every finite monotone Boolean access structure is realizable as a coordination-value threshold. Consequently, observations may exhibit arbitrary high-order complementarity. We establish an exact common-knowledge advantage: a shared public channel and independent private channels can provide every agent the same mutual information while inducing team values $1-\epsilon$ and $\max\{1/2,(1-\epsilon)^n\}$, respectively. We also construct instances where mutual-information selection has zero coordination gain and marginal-value greedy has a vanishing approximation ratio. Optimal design is NP-hard even for two-agent binary-action games. We give an exact mixed-integer formulation and identify separable revelation games, for which coordination gain is monotone submodular and greedy achieves $1-1/e$. Exact experiments on 250 sensor-design instances and a two-responder emergency domain validate the theory: value-aware greedy is optimal on all 40 emergency instances, whereas mutual-information selection captures $0.1\%$ of optimal gain on average. The results formalize a design principle for cooperative systems: make public what agents need to coordinate on, not merely what is most informative.
+\end{abstract}
+
+\section{Introduction}
+A public alarm, shared map annotation, or jointly visible status panel does more than give each agent another observation. Its realization is observed by everyone, everyone knows that everyone observes it, and the resulting fact can support a common convention. This distinction matters whenever independently acting agents must choose compatible actions. A responder who privately knows that a bridge is closed may still be unable to coordinate a route change if she does not know whether her partner knows the same fact. Conversely, a low-entropy public alarm can be decisive if it identifies exactly the exceptional state in which the team must change roles.
+
+Classical team theory studies decentralized decisions under a fixed information structure \cite{Radner1962,MarschakRadner1972,HoChu1972}. Common-information methods reformulate such problems around information already shared by the agents \cite{NayyarEtAl2013}, and common-knowledge MARL learns policies that exploit shared observations \cite{SchroederEtAl2019}. In many engineered systems, however, the information structure is itself a design choice: a platform selects dashboard fields, robots share a limited set of sensor channels, or a game designer decides which facts are publicly revealed. The relevant question is therefore not only \emph{how agents should act}, but also:
+
+\begin{quote}
+\emph{Which state distinctions should become common knowledge under a limited public-observation budget?}
+\end{quote}
+
+We formalize this question as \emph{Budgeted Public Observation Design} (BPOD). A finite state determines agents' private observations and a menu of candidate public features. The designer selects features before the state is realized; their joint realization is broadcast, and the agents then act with decentralized policies. The objective is expected common payoff.
+
+The problem appears superficially similar to sensor selection, suggesting entropy or mutual information as a surrogate, and to submodular maximization, suggesting marginal-value greedy. Our first message is that neither conclusion is valid without additional structure. Public observations can be complementary in arbitrary patterns. In fact, using an explicit XOR-share construction, we prove that \emph{every} finite monotone access structure can be embedded: authorized feature sets reveal the correct team action, while every unauthorized set is completely uninformative about it. This strengthens an isolated parity counterexample into a general expressivity result.
+
+Our second message is specifically epistemic. Equal information for every individual agent does not imply equal coordination value. For a binary target passed through a binary symmetric channel, a shared public output gives team value $1-\epsilon$, whereas conditionally independent private outputs give only $\max\{1/2,(1-\epsilon)^n\}$, even though each marginal mutual information is exactly $1-h_2(\epsilon)$. The gap is caused by correlation and common observability, not individual signal quality.
+
+Our remaining contributions turn these limitations into a tractable design framework:
+\begin{itemize}
+    \item We give a lower-information feature that strictly dominates a higher-information nuisance feature for team value, and a family on which ordinary value-greedy has approximation ratio tending to zero.
+    \item We reduce weighted Max $k$-Coverage to BPOD, proving NP-hardness under severe restrictions and transferring the $1-1/e$ approximation threshold for normalized coordination gain.
+    \item We give a mixed-integer linear program (MILP) that jointly selects public features and exact deterministic decentralized policies.
+    \item We identify \emph{separable revelation games}, where independent sensors redundantly reveal context-specific targets. Their coordination gain is monotone submodular, so greedy achieves $1-1/e$.
+    \item Exact CPU experiments reproduce all separations, test the positive class on 250 random instances, and evaluate public alarms for two-agent emergency response. In the operational benchmark, every candidate feature is a statistic of payoff-relevant incident severity; nevertheless, mutual-information selection is almost valueless because it prefers frequent distinctions over rare coordination-critical ones.
+\end{itemize}
+
+\section{Related Work}
+\paragraph{Team information structures.}
+Team decision theory formalizes common-payoff decisions made from heterogeneous information \cite{Radner1962,MarschakRadner1972,HoChu1972,Witsenhausen1971}. Summers, Li, and Kamgarpour \cite{SummersEtAl2017} optimize additions to an information-link graph and show that team performance need not possess a general supermodularity property. We instead select a menu of state features to make public while retaining heterogeneous private observations. Beyond a different design object, we provide an access-structure representation theorem, a public/private information separation, complexity and approximation results, and an exact feature-policy MILP.
+
+\paragraph{Value of information and sensor selection.}
+Blackwell's comparison of experiments orders information structures for a single decision maker \cite{Blackwell1953}. Informational substitutes characterize when decision value is submodular in acquired signals \cite{ChenWaggoner2016}. Sensor and value-of-information selection often exploit entropy or submodularity in structured probabilistic models \cite{GuestrinEtAl2005,KrauseGuestrin2005,GolovinKrause2011}. BPOD uses a decentralized team value functional: one public feature simultaneously refines every agent's information partition and can enable a joint convention. Our negative results delimit when information-only or generic diminishing-returns arguments fail; the separable-revelation class supplies a positive analogue.
+
+\paragraph{Common information and multi-agent coordination.}
+The common-information approach treats shared history as the state of a coordinator in decentralized control \cite{NayyarEtAl2013}; Dec-POMDP methods similarly optimize policies under a fixed observation model \cite{OliehoekAmato2016}. MACKRL exploits common knowledge available in partially observable tasks \cite{SchroederEtAl2019}. Our designer instead chooses which exogenous distinctions become public before execution. Dynamic design is an important extension but is outside the present one-shot model.
+
+\paragraph{Information design.}
+Bayesian persuasion designs signals for strategic receivers \cite{KamenicaGentzkow2011,DughmiXu2017}, including settings with multiple receivers and externalities \cite{ShakiEtAl2025} or public signaling in congestion games \cite{GriesbachEtAl2024}. BPOD has aligned agents, no obedience constraints, and a fixed feature menu with sensing or interface costs. Public-observation stochastic games \cite{HorakBosansky2019} also assume, rather than optimize, the public signal structure.
+
+\section{Budgeted Public Observation Design}
+There are agents $i\in[n]$, a finite state space $\Theta$, and prior $\mu\in\Delta(\Theta)$. Agent $i$ privately observes $o_i(\theta)\in\mathcal O_i$ and chooses $a_i\in\mathcal A_i$. The team receives common utility $u(\theta,\mathbf a)$.
+
+The designer has $m$ deterministic candidate features $\phi_j:\Theta\to\mathcal Z_j$, with costs $c_j>0$. It selects $S\subseteq[m]$ satisfying $c(S)=\sum_{j\in S}c_j\le B$. The public signal is
+\[
+ z_S(\theta)=(\phi_j(\theta))_{j\in S}.
+\]
+The broadcast protocol is commonly known, so $z_S$ is common knowledge. Stochastic sensors fit the model by augmenting $\theta$ with exogenous sensor noise.
+
+A decentralized behavioral policy is $\pi_i(\cdot\mid o_i,z_S)\in\Delta(\mathcal A_i)$. Define
+\begin{align}
+V(S)&=\max_{\boldsymbol\pi}\;\mathbb E_{\theta\sim\mu,\mathbf a\sim\boldsymbol\pi}
+        [u(\theta,\mathbf a)],\\
+F(S)&=V(S)-V(\varnothing),
+\end{align}
+where $F$ is the \emph{coordination gain}. We optimize $V(S)$ subject to $c(S)\le B$; approximation statements use $F$ so an uninformative baseline cannot conceal poor design.
+
+\begin{lemma}[Deterministic sufficiency]
+For every fixed $S$, an optimal decentralized policy profile is deterministic.
+\end{lemma}
+\begin{proof}
+Expected utility is multilinear in the action simplex associated with every agent-information cell. Fixing all other cells makes the objective linear in one simplex, whose maximum is attained at an extreme point. Repeating over finitely many cells yields a deterministic optimum.
+\end{proof}
+
+\begin{lemma}[Monotonicity]
+If $S\subseteq T$, then $V(S)\le V(T)$.
+\end{lemma}
+The agents can ignore the extra coordinates of $z_T$. Thus public information cannot hurt a team that optimizes its policy, although selecting it can consume budget.
+
+\section{The Value and Structure of Common Knowledge}
+\subsection{Arbitrary Complementarity}
+The two-bit parity game already violates submodularity. Let $(b_1,b_2)$ be uniform, give the agents no private information, and reward them only when both output $b_1\oplus b_2$. Feature $j$ reveals $b_j$. Then
+\[
+V(\varnothing)=V(\{1\})=V(\{2\})=\tfrac12,
+\qquad V(\{1,2\})=1.
+\]
+The marginal value of feature 2 increases from zero to $1/2$ after feature 1.
+
+This complementarity is not a peculiarity of parity.
+
+\begin{theorem}[Access-structure expressivity]\label{thm:access}
+Let $\mathcal C\subseteq2^{[m]}$ be any upward-closed family with $\varnothing\notin\mathcal C$. There exists a two-agent binary-action BPOD instance such that
+\[
+V(S)=\begin{cases}
+1,&S\in\mathcal C,\\
+1/2,&S\notin\mathcal C.
+\end{cases}
+\]
+\end{theorem}
+
+\begin{proof}[Proof sketch]
+Let $E_1,\ldots,E_L$ be the minimal authorized sets and draw a fair target bit $X$. For each $E_\ell$ independently, create an XOR sharing of $X$: draw $|E_\ell|-1$ fair shares and set the last share so all shares XOR to $X$. Feature $j$ broadcasts all shares assigned to it. If $S$ contains a minimal edge, it reconstructs $X$. Otherwise, every XOR block has a missing fair share, so the selected shares in that block are independent of $X$; independence across blocks makes the entire public view independent of $X$. Both agents must output $X$, giving values one and one half. The supplement gives the full bijection argument.
+\end{proof}
+
+The construction uses a standard secret-sharing primitive \cite{Beimel2011}; its role here is representational. It shows that without structural assumptions, BPOD can encode complementary sets of any order, so neither pairwise tests nor generic submodular guarantees are sufficient.
+
+\subsection{Equal Individual Information Is Not Equal Team Value}
+We next isolate the benefit of a public realization. Let $X$ be a uniform bit and let $Q_\epsilon$ be a binary symmetric channel with crossover $\epsilon\in[0,1/2]$. The team earns one exactly when all $n$ agents output $X$.
+
+In the \emph{public} experiment, all agents observe the same $Z\sim Q_\epsilon(\cdot\mid X)$. In the \emph{private} experiment, they observe conditionally independent $Y_i\sim Q_\epsilon(\cdot\mid X)$.
+
+\begin{theorem}[Common-knowledge advantage]\label{thm:publicprivate}
+The optimal values are
+\[
+V_{\rm pub}=1-\epsilon,
+\qquad
+V_{\rm priv}=\max\{\tfrac12,(1-\epsilon)^n\},
+\]
+while every agent receives the same marginal information:
+\[
+I(X;Z)=I(X;Y_i)=1-h_2(\epsilon).
+\]
+\end{theorem}
+
+\begin{proof}[Proof sketch]
+For a binary input and signal, every deterministic local rule is constant, identity, or complement. Under the public signal, identity attains $1-\epsilon$ and dominates the other rules. Under independent signals, any profile containing a constant rule succeeds on at most one value of $X$ and hence with probability at most $1/2$. If all rules are nonconstant and $r$ agents use identity, simultaneous correctness is $(1-\epsilon)^r\epsilon^{n-r}$, maximized by $r=n$. Both upper bounds are attainable.
+\end{proof}
+
+At $\epsilon=0.1$ and $n=10$, public value is $0.9$ and private value is $0.5$. Figure~\ref{fig:epistemic} shows the gap and a separate failure of information-only feature selection.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=.48\textwidth]{public_private_gap.pdf}\hfill
+\includegraphics[width=.48\textwidth]{information_decoy.pdf}
+\caption{\textbf{Information is not coordination.} Left: a shared public channel retains value $1-\epsilon$, while independent private channels with identical per-agent mutual information converge to the constant-convention value. Right: a fair nuisance bit has more mutual information about the full state than a biased target bit, but zero coordination gain.}
+\label{fig:epistemic}
+\end{figure*}
+
+\subsection{Mutual Information Can Select the Wrong Feature}
+Let $T\sim\mathrm{Bernoulli}(p)$ for $0<p<1/2$ and let $N$ be an independent fair bit. The agents must both output $T$ and may publicize either $N$ or $T$. If mutual information is measured with respect to the full state $(T,N)$, then
+\[
+I((T,N);N)=1>h_2(p)=I((T,N);T).
+\]
+The information-maximizing choice $N$ leaves value at the baseline $1-p$, while revealing $T$ gives value one. Hence its normalized gain is zero. This does not assert that mutual information is universally unsuitable; it proves that state uncertainty and decentralized action value are different objectives.
+
+\section{Complexity and Exact Optimization}
+\subsection{Hardness}
+\begin{theorem}[Max-Coverage reduction]\label{thm:hard}
+BPOD is NP-hard even with two agents, binary actions, deterministic features, unit costs, and common payoff. Moreover, unless $P=NP$, no polynomial-time algorithm approximates normalized gain within $1-1/e+\eta$ for any fixed $\eta>0$.
+\end{theorem}
+
+\begin{proof}[Proof sketch]
+Reduce weighted Max $k$-Coverage. A publicly known context $r$ has weight $w_r$, and a hidden target bit is fair. Feature $j$ reveals the bit in contexts belonging to set $C_j$ and returns an erasure otherwise. Covered contexts have value one; uncovered contexts have value one half. Therefore
+\[
+V(S)=\frac12+\frac12\sum_{r\in\cup_{j\in S}C_j}w_r.
+\]
+Maximizing $F(S)$ is exactly weighted Max $k$-Coverage, and the approximation threshold follows from \citet{Feige1998}.
+\end{proof}
+
+\subsection{Joint Feature-and-Policy MILP}
+For arbitrary finite instances, introduce binary variables $x_j$ for selected features, $y_{i\theta a}$ for agent $i$'s action in state $\theta$, and $q_{\theta\mathbf a}$ for the realized joint action. Besides budget and one-action constraints, the key feature-controlled nonanticipativity condition is
+\begin{equation}\label{eq:nonanticipativity}
+|y_{i\theta a}-y_{i\theta'a}|
+\le
+\sum_{j:\phi_j(\theta)\ne\phi_j(\theta')}x_j
+\end{equation}
+whenever $o_i(\theta)=o_i(\theta')$. If no selected public feature distinguishes the states, the right side is zero and the agent must act identically. Joint-action consistency is enforced by
+\[
+\sum_{\mathbf a}q_{\theta\mathbf a}=1,
+\qquad
+q_{\theta\mathbf a}\le y_{i\theta a_i}
+\quad\forall i.
+\]
+The objective is
+\[
+\max\sum_{\theta,\mathbf a}\mu(\theta)u(\theta,\mathbf a)q_{\theta\mathbf a},
+\quad
+\text{s.t. }\sum_jc_jx_j\le B.
+\]
+
+\begin{theorem}[MILP exactness]\label{thm:milp}
+The MILP optimum equals the optimal BPOD value.
+\end{theorem}
+Every deterministic decentralized design induces a feasible integer assignment. Conversely, Equation~\eqref{eq:nonanticipativity} makes the selected actions constant on each private-public information cell, so every feasible integer solution induces a valid decentralized policy; $q$ selects its unique compatible joint action. Lemma 1 completes exactness.
+
+The formulation uses $m+|\Theta|\sum_i|\mathcal A_i|+|\Theta|\prod_i|\mathcal A_i|$ binary variables. It is intended for exact small and medium instances, theorem verification, and benchmarking scalable heuristics---not large Dec-POMDPs.
+
+\section{A Tractable Structured Class}
+The negative results motivate an explicit substitutes condition. In a \emph{separable revelation game}, context $r$ occurs with weight $w_r$. Without a successful public revelation the team succeeds with probability $q_r$. Feature $j$ independently reveals the correct context-specific target with probability $p_{rj}$; one successful selected revelation suffices.
+
+\begin{theorem}[Submodular revelation]\label{thm:submod}
+The coordination gain is
+\[
+F(S)=\sum_r w_r(1-q_r)
+\left[1-\prod_{j\in S}(1-p_{rj})\right],
+\]
+and is monotone submodular. Under $|S|\le k$, marginal-value greedy achieves
+\[
+F(S_{\rm greedy})\ge(1-1/e)F(S^\star).
+\]
+\end{theorem}
+
+The marginal gain of $j$ is
+\[
+\Delta_j(S)=\sum_r w_r(1-q_r)p_{rj}
+\prod_{\ell\in S}(1-p_{r\ell}),
+\]
+which is nonnegative and decreases as $S$ grows; the guarantee is classical \cite{NemhauserEtAl1978}. Deterministic coverage is the special case $p_{rj}\in\{0,1\}$, linking Theorems~\ref{thm:hard} and \ref{thm:submod}: the guarantee is essentially best possible in polynomial time.
+
+Outside this class, even value-aware greedy can fail sharply. Mix a parity task of probability $1-\delta$ with an independent one-feature distractor task of probability $\delta$, and give budget two. The parity features have zero singleton gain; the distractor has gain $\delta/2$, so greedy selects it and cannot complete the parity pair. The optimal and greedy gains are $(1-\delta)/2$ and $\delta/2$, yielding ratio $\delta/(1-\delta)\to0$ (Figure~\ref{fig:algorithms}, left).
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=.48\textwidth]{greedy_failure.pdf}\hfill
+\includegraphics[width=.48\textwidth]{revelation_coverage.pdf}
+\caption{\textbf{Structure determines algorithmic behavior.} Left: marginal-value greedy has vanishing gain on complementary parity instances. Right: in 250 separable-revelation games with 12 sensors and budget four, greedy is near-optimal and respects the $1-1/e$ guarantee. Ratios normalize by the no-feature baseline.}
+\label{fig:algorithms}
+\end{figure*}
+
+\section{Experiments}
+All experiments are exact, CPU-only, and generated by one script with fixed seeds. The code uses SciPy's HiGHS MILP backend. Unit tests verify every analytic construction and compare the joint MILP against exhaustive feature-set optimization. We evaluate three questions: Do the structural separations appear at finite scale? Does greedy work in the positive class? Do information-only criteria fail in an operational team problem without artificial nuisance variables?
+
+\paragraph{Separable revelation.}
+We generate \NumCoverageInstances{} instances with eight contexts, twelve sensors, and budget four. Context weights are Dirichlet, baseline success lies in $[0.45,0.72]$, and overlapping sensor reliabilities lie in $[0.45,0.98]$. We compare marginal-value greedy, ranking sensors by singleton gain, and random feasible sets against exhaustive optimum. Greedy obtains mean ratio \CoverageGreedyMean{} and minimum \CoverageGreedyMin{}; singleton ranking obtains \CoverageSingletonMean{} and random selection \CoverageRandomMean{}.
+
+\paragraph{Emergency response.}
+Two responders choose between sites A and B. Each privately observes severity at one site. A mild incident needs one responder; a rare severe incident needs both and has larger payoff. The public menu contains severe alarms, a both-mild indicator, severity parity, and site-incident flags. Crucially, the primary benchmark contains \emph{no payoff-irrelevant state variable}: every feature is a deterministic statistic of incident severities. We randomize priors and rewards over \NumEmergencyInstances{} instances and select one unit-cost public alarm.
+
+Baselines are exact value-greedy, unconditional MI, mean conditional MI
+$\bar I_j(S)=\frac1n\sum_i I(\Theta;\phi_j\mid O_i,Z_S)$, and a random singleton. Figure~\ref{fig:applications} and Table~\ref{tab:results} report the fraction of optimal coordination gain. Value-greedy finds the exact optimum on every instance. MI obtains only \EmergencyMIMean{} on average and private-conditioned MI obtains \EmergencyCMIMean{}; they favor frequent severity partitions over the lower-entropy severe alarm that changes whether responders should split or double-team. Adding two explicit high-entropy telemetry decoys reduces MI to exactly zero, as expected, but is not needed for the main result.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lcc}
+\toprule
+Method & Revelation & Emergency \\
+\midrule
+Value greedy & \CoverageGreedyMean{} & \EmergencyGreedyMean{} \\
+Singleton/value ranking & \CoverageSingletonMean{} & -- \\
+Mutual information & -- & \EmergencyMIMean{} \\
+Private-cond. MI & -- & \EmergencyCMIMean{} \\
+Random & \CoverageRandomMean{} & \EmergencyRandomMean{} \\
+\bottomrule
+\end{tabular}
+\caption{Mean fraction of optimal coordination gain. Revelation has 250 instances; emergency response has 40 operational-only instances.}
+\label{tab:results}
+\end{table}
+
+\paragraph{Exact scaling.}
+On weighted coverage games with budget $m/2$, we compare the joint MILP to direct enumeration using the closed-form coverage value. At $m=18$, enumeration checks 155,382 subsets. Median wall time in this environment is $0.0044$ seconds for the MILP and $0.462$ seconds for enumeration, an illustrative \RuntimeSpeedup{}$\times$ difference (Figure~\ref{fig:applications}, right). Timing is machine- and solver-dependent; the invariant result is exact agreement in value.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=.48\textwidth]{emergency_response.pdf}\hfill
+\includegraphics[width=.48\textwidth]{runtime_scaling.pdf}
+\caption{\textbf{Exact application results.} Left: utility-aware public-alarm selection captures all optimal gain in operational emergency-response games; information-only objectives capture essentially none. Error bars are standard errors. Right: joint MILP versus subset enumeration on coverage instances; both return identical values.}
+\label{fig:applications}
+\end{figure*}
+
+\section{Discussion and Limitations}
+BPOD separates three notions that are often conflated: a fact can be informative about the state, decision-relevant to one agent, or coordination-relevant because it creates a shared contingency for joint action. Theorem~\ref{thm:publicprivate} shows that marginal informativeness alone misses the third property. Theorem~\ref{thm:access} shows why no universal scalar information score can recover it: public features can implement arbitrary authorization patterns.
+
+The model is deliberately finite and one-shot. It assumes aligned utilities, a known prior, truthful and reliable public broadcast, and commitment to the selected interface. It does not capture strategic reporting, privacy leakage, adversarial sensor failure, or dynamic belief hierarchies. The exact MILP scales exponentially through states and joint actions, as expected for decentralized team optimization. The positive class is sufficient, not necessary; characterizing broader substitutes conditions for team value is an important theoretical direction.
+
+For dynamic systems, one can select public observation channels in a Dec-POMDP or common-information coordinator, trading immediate sensing cost against future common beliefs. For robust design, one can optimize worst-case value over a prior or sensor ambiguity set. Privacy introduces a direct tension: the best coordination feature may reveal sensitive state. These extensions preserve the central design question established here---what should become commonly observable---but require new algorithms.
+
+\section{Conclusion}
+We formalized the design of common knowledge as budgeted public feature selection in decentralized team games. The value function can realize arbitrary monotone access structures, public and private channels with equal individual information can have sharply different team value, and both mutual-information and marginal-value heuristics can fail without structure. Nevertheless, an exact MILP solves finite instances, and separable revelation yields a natural submodular class with an essentially optimal greedy guarantee. The theory and exact experiments support a simple engineering principle: public interfaces should be optimized for compatible action, not merely for uncertainty reduction.
