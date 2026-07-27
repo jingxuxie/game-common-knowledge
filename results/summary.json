@@ -15,7 +15,7 @@
   "emergency_budget1_mi_mean": 0.0009520552370468393,
   "emergency_budget1_random_mean": 0.3239590850811995,
   "emergency_instances": 40,
-  "emergency_joint_milp_median_seconds": 0.024456417500005045,
+  "emergency_joint_milp_median_seconds": 0.02716416850000769,
   "emergency_most_common_optimal": "[(('severe alarm B',), 23), (('severe alarm A',), 17)]",
   "emergency_nuisance_mi_mean": 0.0,
   "greedy_delta_001_ratio": 0.010101010101010102,
@@ -25,8 +25,8 @@
   "public_private_n10_private": 0.5,
   "public_private_n10_public": 0.9,
   "runtime_enumerated_subsets": 155382,
-  "runtime_enumeration_seconds": 0.6081856970000104,
-  "runtime_joint_seconds": 0.00660230099998671,
+  "runtime_enumeration_seconds": 0.6135118819999832,
+  "runtime_joint_seconds": 0.007571171999984472,
   "runtime_max_features": 18,
-  "runtime_speedup": 92.11723261348348
+  "runtime_speedup": 81.03261714319018
 }
