@@ -56,7 +56,7 @@ jobs:
 
       - name: Validate manuscript PDFs
         run: |
-          test "$(pdfinfo paper/preprint.pdf | awk '/^Pages:/ {print $2}')" = "7"
+          test "$(pdfinfo paper/preprint.pdf | awk '/^Pages:/ {print $2}')" = "8"
           test "$(pdfinfo paper/supplement.pdf | awk '/^Pages:/ {print $2}')" = "5"
           if pdffonts paper/preprint.pdf | grep -q "Type 3"; then exit 1; fi
           if pdffonts paper/supplement.pdf | grep -q "Type 3"; then exit 1; fi
