@@ -33,10 +33,24 @@ jobs:
             echo "Bootstrap archive already expanded."
             exit 0
           fi
-          cat bootstrap/part-* | base64 --decode > /tmp/game-common-knowledge.tar.gz
-          tar -xzf /tmp/game-common-knowledge.tar.gz
+          python - <<'PY'
+          import base64
+          import pathlib
+          import tarfile
+
+          parts = sorted(pathlib.Path("bootstrap").glob("part-*"))
+          encoded = "".join(path.read_text(encoding="utf-8").strip() for path in parts)
+          payload = base64.b64decode(encoded, validate=True)
+          archive = pathlib.Path("/tmp/game-common-knowledge.tar.gz")
+          archive.write_bytes(payload)
+          with tarfile.open(archive, "r:gz") as handle:
+              handle.extractall(".")
+          print(f"Expanded {len(parts)} parts into {len(payload)} archive bytes")
+          PY
+          # Add the permanent workflow later through the GitHub connector so this
+          # one-time Actions token never needs workflow-write permission.
+          rm -f .github/workflows/tests.yml
           rm -rf bootstrap
-          rm -f .github/workflows/bootstrap.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
