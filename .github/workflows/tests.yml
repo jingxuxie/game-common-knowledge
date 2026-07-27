@@ -43,7 +43,7 @@ jobs:
         run: |
           test -s results/summary.json
           test -s figures/emergency_response.pdf
-          test -s figures/public_private.pdf
+          test -s figures/public_private_gap.pdf
           test -s paper/generated_results.tex
 
       - name: Install document tools
