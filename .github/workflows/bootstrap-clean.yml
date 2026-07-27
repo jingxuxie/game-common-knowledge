@@ -1,12 +1,13 @@
 name: Expand and validate research artifact
 
 on:
-  push:
+  pull_request:
     branches:
-      - agent/submission-ready-common-knowledge
-    paths:
-      - "bootstrap/**"
-      - ".github/workflows/bootstrap-clean.yml"
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
 
 permissions:
   contents: write
