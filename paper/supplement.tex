@@ -37,7 +37,7 @@ We write $V(S)=\max_{\boldsymbol\pi}J(S,\boldsymbol\pi)$ and $F(S)=V(S)-V(\varno
 For every fixed public feature set $S$, there is an optimal deterministic decentralized policy profile.
 \end{lemma}
 \begin{proof}
-For each agent $i$ and each information cell $h=(o_i,z_S)$, let $p_{i,h}\in\Delta(\calA_i)$ denote the local action distribution. The objective $J$ is multilinear in the finite collection $\{p_{i,h}\}$. Fix all variables except one $p_{i,h}$. The remaining objective is linear over a simplex, so it attains a maximum at a vertex, i.e., at a deterministic action. Replace that cell by such a maximizer and continue over all cells. Each replacement weakly increases the objective; after finitely many replacements every cell is deterministic. Therefore a deterministic profile attains the optimum. 
+For each agent $i$ and each information cell $h=(o_i,z_S)$, let $p_{i,h}\in\Delta(\calA_i)$ denote the local action distribution. The objective $J$ is multilinear in the finite collection $\{p_{i,h}\}$. Fix all variables except one $p_{i,h}$. The remaining objective is linear over a simplex, so it attains a maximum at a vertex, i.e., at a deterministic action. Replace that cell by such a maximizer and continue over all cells. Each replacement weakly increases the objective; after finitely many replacements every cell is deterministic. Therefore a deterministic profile attains the optimum.
 \end{proof}
 
 \begin{lemma}[Monotonicity]\label{lem:mono}
@@ -65,7 +65,7 @@ Feature $j$ reports the tuple of all shares $R_{\ell,t}$ for which $j=j_{\ell,t}
 
 If $S\in\calC$, then $S$ contains some minimal set $E_\ell$. Its selected features contain every share in block $\ell$, so the public signal reconstructs $X$ by XOR. Hence $V(S)=1$.
 
-Now suppose $S\notin\calC$. Then every block $E_\ell$ has at least one unselected share. We show that the selected shares in block $\ell$ are independent of $X$. Conditional on any $X=x$ and any assignment to the selected shares, choose one missing share freely and then choose the last missing share to satisfy the XOR constraint (with the obvious one-missing-share specialization). The number of completions is the same for $x=0$ and $x=1$, so the selected block view has identical conditional distribution under both target values. Because the random masks are independent across blocks conditional on $X$, the concatenated public view is also independent of $X$. Thus no policy can predict $X$ above chance, and the constant convention attains $1/2$. 
+Now suppose $S\notin\calC$. Then every block $E_\ell$ has at least one unselected share. Conditional on any $X=x$ and any assignment to the selected shares, choose one missing share freely and then choose the last missing share to satisfy the XOR constraint (with the obvious one-missing-share specialization). The number of completions is the same for $x=0$ and $x=1$, so the selected block view has identical conditional distribution under both target values. Because the random masks are independent across blocks conditional on $X$, the concatenated public view is also independent of $X$. Thus no policy can predict $X$ above chance, and the constant convention attains $1/2$.
 \end{proof}
 
 \subsection{Public versus independent private channels}
@@ -133,24 +133,57 @@ For completeness, take a feasible feature set $S$ and deterministic decentralize
 For soundness, let $(x,y,q)$ be a feasible integer solution and define $S=\{j:x_j=1\}$. Suppose states $\theta,\theta'$ yield the same private observation for agent $i$ and the same selected public signal. Then every selected feature agrees, so the right side of both nonanticipativity inequalities is zero. Hence $y_{i\theta a}=y_{i\theta'a}$ for all actions. The one-action constraints therefore define a deterministic action on every private-public information cell. The $q$ constraints and $\sum_{\mathbf a}q_{\theta\mathbf a}=1$ select exactly the joint action induced by those local actions. Thus the solution corresponds to a feasible decentralized policy with identical objective. Lemma~\ref{lem:det} shows no randomized policy can do better.
 \end{proof}
 
-\section{Separable Revelation and Greedy}
-\begin{theorem}[Submodular revelation]\label{thm:submod-supp}
-In context $r$ with probability $w_r$, suppose baseline success is $q_r$ and selected sensor $j$ independently reveals the correct target with probability $p_{rj}$. If one successful revelation suffices, then
+\section{Correlated Public Certificates}
+
+For each publicly observed context $r$, let $\Omega_r$ be a finite or measurable outcome space with arbitrary distribution $\nu_r$. Outcome $\omega$ determines a set $C_r(\omega)\subseteq[m]$ of features that emit a decisive certificate. If a selected certificate is present, all agents can identify and implement a context-optimal compatible action, normalized to success one. If no selected certificate is present, the best decentralized value is $q_r$. Correlation among feature outcomes is entirely encoded in the random set $C_r(\omega)$.
+
+\begin{theorem}[Correlated certificate submodularity]\label{thm:cert-supp}
+The coordination gain
 \[
-F(S)=\sum_r w_r(1-q_r)\left[1-\prod_{j\in S}(1-p_{rj})\right]
+F(S)=\sum_r w_r(1-q_r)
+\int_{\Omega_r}\ind\{S\cap C_r(\omega)\ne\varnothing\}\,d\nu_r(\omega)
 \]
-is normalized, monotone, and submodular. Cardinality-budget marginal-value greedy attains at least $(1-1/e)F(S^\star)$.
+is normalized, monotone, and submodular for arbitrary joint certificate distributions.
 \end{theorem}
 \begin{proof}
-In context $r$, no selected feature reveals with probability $\prod_{j\in S}(1-p_{rj})$. Relative to the baseline, the gain is $(1-q_r)$ times the probability of at least one revelation, proving the formula. The marginal gain of adding $j\notin S$ is
+Fix $r$ and $\omega$, and abbreviate $C=C_r(\omega)$. Define
 \[
-\Delta_j(S)=\sum_r w_r(1-q_r)p_{rj}\prod_{\ell\in S}(1-p_{r\ell}).
+h_C(S)=\ind\{S\cap C\ne\varnothing\}.
 \]
-Every term is nonnegative. If $S\subseteq T$, the product for $T$ is no larger than the product for $S$, so $\Delta_j(T)\le\Delta_j(S)$. This is diminishing returns. The greedy guarantee follows from the classical theorem of Nemhauser, Wolsey, and Fisher \cite{NemhauserEtAl1978}.
+This function is normalized and monotone. For $A\subseteq B$ and $j\notin B$, its marginal is
+\[
+h_C(A\cup\{j\})-h_C(A)
+=\ind\{j\in C,\ A\cap C=\varnothing\}.
+\]
+The analogous marginal at $B$ replaces the condition $A\cap C=\varnothing$ by the stronger condition $B\cap C=\varnothing$. Hence the marginal at $A$ is at least the marginal at $B$, proving submodularity for every realized certificate set. Nonnegative weighted sums and expectations preserve normalization, monotonicity, and submodularity. No factorization or conditional-independence assumption is used.
 \end{proof}
 
-\begin{theorem}[Value-greedy can be arbitrarily bad]\label{thm:greedybad-supp}
-For every $\rho>0$, there is a three-feature, budget-two BPOD instance on which marginal-value greedy obtains less than $\rho$ times optimal normalized gain.
+\begin{corollary}[Cardinality and cost budgets]\label{cor:budgets}
+Under $|S|\le k$, marginal-value greedy achieves at least $(1-1/e)F(S^\star)$. Under a positive-cost budget $\sum_{j\in S}c_j\le B$, a polynomial-time $(1-1/e)$ approximation exists.
+\end{corollary}
+\begin{proof}
+The cardinality claim is the classical theorem of Nemhauser, Wolsey, and Fisher \cite{NemhauserEtAl1978}. The cost-budget claim follows from Sviridenko's monotone-submodular knapsack algorithm \cite{Sviridenko2004}.
+\end{proof}
+
+\begin{corollary}[Independent revelation]\label{cor:independent}
+If feature $j$ is in $C_r(\omega)$ independently with probability $p_{rj}$, then
+\[
+F(S)=\sum_r w_r(1-q_r)\left[1-\prod_{j\in S}(1-p_{rj})\right].
+\]
+\end{corollary}
+\begin{proof}
+The selected set fails to contain a certificate in context $r$ exactly when every selected feature fails, which has probability $\prod_{j\in S}(1-p_{rj})$.
+\end{proof}
+
+\begin{proposition}[Marginals do not identify redundancy]\label{prop:marginals-supp}
+For every $p\in(0,1)$, there are two two-feature certificate systems in which each singleton has gain $p$, but the pair has gain $p$ in one system and $1-(1-p)^2$ in the other.
+\end{proposition}
+\begin{proof}
+Use one context, baseline zero, and unit value after a certificate. In the correlated system, let $C(\omega)=\{1,2\}$ with probability $p$ and $C(\omega)=\varnothing$ otherwise. Each singleton and the pair then hit the certificate set with probability $p$. In the independent system, include each feature in $C(\omega)$ independently with probability $p$. Each singleton again has gain $p$, while the pair succeeds unless both events fail, giving $1-(1-p)^2$.
+\end{proof}
+
+\begin{theorem}[Value-greedy can be arbitrarily bad]\label{thm:greedy-supp}
+For every $\rho>0$, there is a three-feature, budget-two BPOD instance for which marginal-value greedy obtains less than $\rho$ times the optimal coordination gain.
 \end{theorem}
 \begin{proof}
 Choose $0<\delta<\rho/(1+\rho)$. A public context chooses a parity task with probability $1-\delta$ and a distractor task with probability $\delta$. In parity context, the target is the XOR of two fair bits, and features 1 and 2 reveal one bit each. In distractor context, the target is a fair bit revealed by feature 3. Agents must both output the active target. The no-feature value is $1/2$.
@@ -159,10 +192,17 @@ Features 1 and 2 each have zero singleton gain, while feature 3 has gain $\delta
 \end{proof}
 
 \section{Experimental Details}
-All experiments run on CPU using NumPy, SciPy's HiGHS MILP interface, and Matplotlib. Fixed random seeds appear in the scripts. Unit tests compare the joint MILP against exhaustive feature-set optimization on small instances and verify all analytic values.
+All experiments run on CPU using NumPy, SciPy's HiGHS MILP interface, and Matplotlib. Fixed random seeds appear in the scripts. Unit tests compare the joint MILP against exhaustive feature-set optimization on small instances, verify all analytic values, and exhaustively check diminishing returns on small correlated-certificate instances.
 
-\paragraph{Separable revelation.}
+\paragraph{Independent revelation.}
 We draw 250 instances with eight contexts, twelve candidate sensors, budget four, Dirichlet context weights, baseline success in $[0.45,0.72]$, and overlapping sensor reliabilities in $[0.45,0.98]$. Exact subset search supplies the optimum. We compare marginal-value greedy, singleton ranking, and random feasible sets.
+
+\paragraph{Shared failure modes.}
+We draw 250 instances with eight contexts, twelve sensors arranged into three common failure domains, and budget four. In each instance one randomly chosen domain has uptime in $[0.52,0.68]$ and highly reliable local detectors in $[0.91,0.995]$; the other domains have uptime in $[0.88,0.98]$ and local detector reliabilities in $[0.48,0.68]$. For a selected set $S$, the exact probability of no certificate in context $r$ is
+\[
+\prod_d\left[(1-a_{rd})+a_{rd}\prod_{j\in S\cap G_d}(1-p_{rj})\right],
+\]
+where $a_{rd}$ is domain uptime and $G_d$ its sensors. This creates positive within-domain correlation. The misspecified baseline keeps each marginal probability $a_{r,d(j)}p_{rj}$ but multiplies sensor failures independently. Exhaustive subset search supplies the true optimum. The experiment reports true-objective ratios and the number of represented failure domains.
 
 \paragraph{Emergency response.}
 Two responders choose site A or B. Each privately observes severity at one site. Mild incidents can be handled by one responder; severe incidents require both and have larger reward. The operational candidate menu contains only deterministic statistics of the payoff-relevant severity pair: two severe alarms, two incident flags, both-mild, and severity parity. For 40 randomized priors and reward scales, we choose one alarm. We compare exact value-greedy, unconditional mutual information, mean private-conditioned mutual information, and a uniformly random feature. A separate stress variant adds two independent telemetry bits to verify the analytic information-decoy failure.
@@ -176,8 +216,11 @@ On weighted-coverage instances with up to 18 features and budget $m/2$, direct e
 \toprule
 Quantity & Value & Instances \\
 \midrule
-Revelation greedy mean ratio & 0.997 & 250 \\
-Revelation greedy minimum ratio & 0.945 & 250 \\
+Independent-revelation greedy mean & 0.997 & 250 \\
+Independent-revelation greedy minimum & 0.945 & 250 \\
+Correlated aware-greedy mean & 1.000 & 250 \\
+Correlated independence-model mean & 0.864 & 250 \\
+Correlated independence-model minimum & 0.616 & 250 \\
 Emergency value-greedy mean ratio & 1.000 & 40 \\
 Emergency MI mean ratio & 0.001 & 40 \\
 Emergency private-conditioned MI & 0.000 & 40 \\
@@ -189,7 +232,7 @@ Greedy-trap ratio ($\delta=.01$) & 0.0101 & -- \\
 \end{table}
 
 \section{Additional Scope Discussion}
-The access-structure theorem is an expressivity statement, not a claim that engineered sensor suites are adversarial secret-sharing schemes. Its purpose is to rule out universal low-order complementarity assumptions. Separable revelation gives one transparent sufficient substitutes condition, but it is not necessary. Broader characterizations may be formulated through informational substitutes, submodularity ratios, or domain-specific graphical structure.
+The access-structure theorem is an expressivity statement, not a claim that engineered sensor suites are adversarial secret-sharing schemes. Its purpose is to rule out universal low-order complementarity assumptions. The correlated-certificate theorem gives one transparent sufficient substitutes condition, but it is not necessary. Its guarantee survives arbitrary dependence among certificate events because each realized outcome is a coverage function; it does not cover settings in which several partial messages must be combined before any one is decision-sufficient.
 
 The one-shot model also cleanly separates public-observation design from dynamic planning. In a Dec-POMDP extension, the designer would choose public channels that influence future common beliefs as well as immediate action. Robust and privacy-aware variants would replace expected value by an ambiguity-set or constrained objective. Strategic agents would introduce obedience and incentive constraints, moving the problem toward Bayesian persuasion and mechanism design.
 

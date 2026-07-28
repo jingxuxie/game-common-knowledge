@@ -1,0 +1,13 @@
+{
+  "correlated_budget": 4,
+  "correlated_independence_domains_mean": 2.012,
+  "correlated_independence_mean": 0.864394014858942,
+  "correlated_independence_min": 0.6162639268701351,
+  "correlated_instances": 250,
+  "correlated_optimal_domains_mean": 3.0,
+  "correlated_random_mean": 0.9651306290485198,
+  "correlated_singleton_mean": 0.8280133501148003,
+  "correlated_true_domains_mean": 3.0,
+  "correlated_true_greedy_mean": 0.9999871676508804,
+  "correlated_true_greedy_min": 0.9994886291697166
+}

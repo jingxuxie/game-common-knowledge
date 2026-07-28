@@ -34,17 +34,22 @@ jobs:
         run: pytest -q
 
       - name: Reproduce experiments
-        run: python experiments/run_all.py
+        run: make experiments
 
       - name: Validate reported results
-        run: python scripts/validate_results.py
+        run: |
+          python scripts/validate_results.py
+          python scripts/validate_correlated_results.py
 
       - name: Check generated research files
         run: |
           test -s results/summary.json
+          test -s results/correlated_certificates_summary.json
           test -s figures/emergency_response.pdf
           test -s figures/public_private_gap.pdf
+          test -s figures/correlated_certificates.pdf
           test -s paper/generated_results.tex
+          test -s paper/generated_correlated_results.tex
 
       - name: Install document tools
         run: |
@@ -56,8 +61,9 @@ jobs:
 
       - name: Validate manuscript PDFs
         run: |
-          test "$(pdfinfo paper/preprint.pdf | awk '/^Pages:/ {print $2}')" = "8"
-          test "$(pdfinfo paper/supplement.pdf | awk '/^Pages:/ {print $2}')" = "5"
+          test "$(pdfinfo paper/preprint.pdf | awk '/^Pages:/ {print $2}')" = "9"
+          test "$(pdfinfo paper/supplement.pdf | awk '/^Pages:/ {print $2}')" = "6"
+          test "$(pdfinfo paper/preprint.pdf | awk -F: '/^Page size:/ {gsub(/^ +/, "", $2); print $2}')" = "612 x 792 pts (letter)"
           if pdffonts paper/preprint.pdf | grep -q "Type 3"; then exit 1; fi
           if pdffonts paper/supplement.pdf | grep -q "Type 3"; then exit 1; fi
 
@@ -68,5 +74,6 @@ jobs:
             results/
             figures/
             paper/generated_results.tex
+            paper/generated_correlated_results.tex
             paper/preprint.pdf
             paper/supplement.pdf

@@ -1,5 +1,5 @@
 \begin{abstract}
-Decentralized agents may each possess accurate information yet fail because they cannot condition their actions on the same event. We study \emph{Budgeted Public Observation Design}: before a finite common-payoff Bayesian game is played, a designer selects a cost-constrained subset of state features whose realizations are broadcast to every agent; the agents then use decentralized policies based on their private and public observations. We show that public-feature value is monotone but can exhibit arbitrary higher-order complementarity. In fact, every finite monotone access structure can be represented as a coordination-value threshold. We also isolate a common-knowledge advantage: a shared public channel and independent private copies can give every agent identical mutual information while inducing team values $1-\epsilon$ and $\max\{1/2,(1-\epsilon)^n\}$. Thus individual informativeness does not characterize coordination value. Computationally, optimal design is NP-hard even for two agents with binary actions; mutual-information selection can have zero normalized gain, and marginal-value greedy can have a vanishing approximation ratio. We give an exact mixed-integer formulation that jointly selects features and decentralized policies. Positively, for separable revelation games---where public sensors are redundant routes to a decision-sufficient target---coordination gain is monotone submodular and greedy achieves $1-1/e$. Exact CPU experiments on synthetic sensor-design instances and a two-responder emergency domain reproduce the separations and show when utility-aware selection substantially outperforms information-only criteria.
+Decentralized agents may each possess accurate information yet fail because they cannot condition their actions on the same event. We study \emph{Budgeted Public Observation Design}: before a finite common-payoff Bayesian game is played, a designer selects a cost-constrained subset of state features whose realizations are broadcast to every agent; the agents then use decentralized policies based on their private and public observations. We show that public-feature value is monotone but can exhibit arbitrary higher-order complementarity. In fact, every finite monotone access structure can be represented as a coordination-value threshold. We also isolate a common-knowledge advantage: a shared public channel and independent private copies can give every agent identical mutual information while inducing team values $1-\epsilon$ and $\max\{1/2,(1-\epsilon)^n\}$. Thus individual informativeness does not characterize coordination value. Computationally, optimal design is NP-hard even for two agents with binary actions; mutual-information selection can have zero normalized gain, and marginal-value greedy can have a vanishing approximation ratio. We give an exact mixed-integer formulation that jointly selects features and decentralized policies. Positively, we identify \emph{public-certificate games}, where any one realized certificate is sufficient for a compatible action. Their expected coordination gain is submodular even under arbitrarily correlated sensor failures, yielding $1-1/e$ approximations for cardinality and knapsack budgets. Exact CPU experiments reproduce the separations and show that ignoring shared failure modes can reduce normalized gain from $1.000$ to $0.864$ on average.
 \end{abstract}
 
 \section{Introduction}
@@ -17,9 +17,9 @@ A running example is emergency response. Two responders each observe conditions 
 
 Our results show that the third notion has its own structure. First, equal marginal information does not imply equal team value. With a binary target and identical binary-symmetric channels, one shared realization maintains value $1-\epsilon$, whereas independent private realizations yield only $\max\{1/2,(1-\epsilon)^n\}$. Second, public features can be complementary in arbitrary patterns. Using a classical general-access secret-sharing construction \cite{ItoEtAl1989,Beimel2011}, we show that every upward-closed family of authorized feature sets can be realized as the sets that enable perfect coordination. This representation result rules out universal pairwise or diminishing-returns explanations.
 
-We then develop both negative and positive algorithmic consequences. BPOD contains weighted Max $k$-Coverage, so it is NP-hard under severe restrictions. A state-mutual-information heuristic can obtain zero coordination gain, and ordinary marginal-value greedy can have approximation ratio tending to zero. For exact small and medium instances, we derive a mixed-integer linear program (MILP) whose nonanticipativity constraints are controlled by the selected features. For a structured class of \emph{separable revelation games}, however, selected sensors are redundant routes to the same context-specific target; the resulting coordination gain is submodular and greedy obtains the classical $1-1/e$ guarantee.
+We then develop both negative and positive algorithmic consequences. BPOD contains weighted Max $k$-Coverage, so it is NP-hard under severe restrictions. A state-mutual-information heuristic can obtain zero coordination gain, and ordinary marginal-value greedy can have approximation ratio tending to zero. For exact small and medium instances, we derive a mixed-integer linear program (MILP) whose nonanticipativity constraints are controlled by the selected features. For a structured class of \emph{public-certificate games}, however, a realized feature can publicly certify a decision-sufficient conclusion. We prove that expected gain is submodular for \emph{any} joint distribution over certificate availability; independence is unnecessary. The standard $1-1/e$ guarantees therefore apply under both cardinality and general cost budgets \cite{NemhauserEtAl1978,Sviridenko2004}.
 
-Exact laptop-scale experiments validate each theoretical claim. On 250 random revelation instances, greedy is near optimal. In 40 emergency-response games containing only payoff-relevant incident variables, value-aware selection finds the optimum in every instance, while unconditional and private-conditioned mutual information recover almost none of the optimal coordination gain. The paper therefore supports a practical principle: \emph{optimize public interfaces for compatible action, not merely for uncertainty reduction.}
+Exact laptop-scale experiments validate each claim. On 250 independent-revelation instances, greedy is near optimal. On 250 shared-failure instances, correlation-aware greedy attains mean normalized gain $1.000$, while a heuristic that treats equal-marginal sensors as independent attains $0.864$ and can fall to $0.616$. In 40 emergency-response games containing only payoff-relevant incident variables, value-aware selection finds the optimum in every instance, while unconditional and private-conditioned mutual information recover almost none of the optimal coordination gain. The paper therefore supports a practical principle: \emph{optimize public interfaces for compatible action and joint failure structure, not merely for uncertainty reduction.}
 
 \section{Related Work}
 
@@ -33,7 +33,7 @@ Classical team theory studies common-payoff decisions under heterogeneous observ
 MACKRL learns policies that exploit common knowledge already present in a partially observable environment \cite{SchroederEtAl2019}. Zero-shot coordination studies whether independently derived conventions remain compatible with unfamiliar partners \cite{HuEtAl2020,TreutleinEtAl2021}; noisy zero-shot coordination relaxes common knowledge of the underlying game itself \cite{AnwarEtAl2024}. \citet{LaufferEtAl2023} identify strategically relevant information about collaborators in dynamic games. These works optimize policies, partner models, or learning procedures under a given information interface. BPOD acts upstream by choosing which exogenous facts become publicly observable before decentralized policy optimization.
 
 \paragraph{Value of information, sensing, and information design.}
-Blackwell comparison orders experiments for a single decision maker \cite{Blackwell1953}, and informational substitutes characterize when decision value has diminishing returns \cite{ChenWaggoner2016}. Sensor-selection work exploits entropy, mutual information, or adaptive submodularity in structured probabilistic models \cite{GuestrinEtAl2005,KrauseGuestrin2005,KrauseEtAl2008,GolovinKrause2011}. Our objective is the optimized value of a decentralized team, not a generic uncertainty measure. Bayesian persuasion and Bayes-correlated-equilibrium approaches also optimize information structures, but for strategic receivers and obedience constraints \cite{KamenicaGentzkow2011,DughmiXu2017,BergemannMorris2016}; recent multi-receiver and congestion-game results continue this line \cite{ShakiEtAl2025,GriesbachEtAl2024}. BPOD instead has aligned utilities, no obedience constraints, and a fixed interpretable feature menu with explicit costs.
+Blackwell comparison orders experiments for a single decision maker \cite{Blackwell1953}, and informational substitutes characterize when decision value has diminishing returns \cite{ChenWaggoner2016}. Sensor-selection work exploits entropy, mutual information, or submodularity in graphical models, outbreak detection, and dynamic POMDP sensing \cite{GuestrinEtAl2005,KrauseGuestrin2005,KrauseEtAl2008,LeskovecEtAl2007,SatsangiEtAl2015,GolovinKrause2011}. Scenario-averaged coverage is already a classical source of submodularity; our certificate result translates that structure into optimized decentralized team value and makes explicit that correlations among sensor outcomes do not invalidate it. Bayesian persuasion and Bayes-correlated-equilibrium approaches also optimize information structures, but for strategic receivers and obedience constraints \cite{KamenicaGentzkow2011,DughmiXu2017,BergemannMorris2016}; recent multi-receiver and congestion-game results continue this line \cite{ShakiEtAl2025,GriesbachEtAl2024}. BPOD instead has aligned utilities, no obedience constraints, and a fixed interpretable feature menu with explicit costs.
 
 \section{Budgeted Public Observation Design}
 
@@ -188,26 +188,30 @@ Every deterministic decentralized design produces a feasible integer solution. C
 
 \section{A Tractable Structured Class}
 
-The negative examples depend on facts that must be combined. Many sensing systems instead provide \emph{redundant} routes to one decision-sufficient conclusion. In a separable revelation game, context $r$ occurs with probability $w_r$. If no public sensor reveals the relevant target, the team attains baseline success $q_r$. Sensor $j$ independently reveals that target with probability $p_{rj}$, and any one successful revelation suffices to implement the context-optimal joint action.
+The negative examples depend on facts that must be combined. Many sensing systems instead provide redundant routes to one decision-sufficient conclusion. In context $r$, let $C_r(\omega)\subseteq[m]$ be the random set of features that emit a \emph{decisive public certificate} under outcome $\omega$. If at least one selected feature is in $C_r(\omega)$, the team can implement the context-optimal compatible action; otherwise it attains baseline success $q_r$. The joint law of $C_r(\omega)$ may contain arbitrary correlations, such as shared power, communication, or calibration failures.
 
-\begin{theorem}[Submodular revelation]\label{thm:submod}
-The coordination gain is
+\begin{theorem}[Correlated public certificates]\label{thm:certificates}
+For context weights $w_r$, the coordination gain is
 \[
-F(S)=\sum_r w_r(1-q_r)
-\left[1-\prod_{j\in S}(1-p_{rj})\right],
+F(S)=\sum_r w_r(1-q_r)\,
+\mathbb E_\omega\!\left[\mathbf 1\{S\cap C_r(\omega)\ne\varnothing\}\right],
 \]
-and is monotone submodular. Under $|S|\le k$, marginal-value greedy satisfies
-\[
-F(S_{\rm greedy})\ge(1-1/e)F(S^\star).
-\]
+and is monotone submodular for any joint distribution of the certificate sets. Hence cardinality-budget greedy achieves $1-1/e$. Under arbitrary positive costs, a polynomial-time $1-1/e$ approximation follows from monotone submodular knapsack maximization \cite{Sviridenko2004}.
 \end{theorem}
 
-The marginal gain of sensor $j$ is
+For a fixed outcome, the indicator is a coverage function: adding $j$ has marginal one exactly when $j\in C_r(\omega)$ and the current set has not already hit $C_r(\omega)$. That marginal can only decrease as the selected set grows. Nonnegative weighted expectations preserve submodularity, so no independence assumption is used.
+
+\begin{proposition}[Marginals do not identify redundancy]\label{prop:marginals}
+For any $p\in(0,1)$, two certificate systems can give both features the same singleton gain $p$ while giving the pair gains $p$ and $1-(1-p)^2$, respectively.
+\end{proposition}
+In the first system the two certificates are perfectly correlated: both are available with probability $p$ and neither otherwise. In the second they are independent Bernoulli-$p$ events. Thus per-feature accuracy and singleton value cannot reveal whether a second sensor is redundant; the joint failure model is decision-relevant even though submodularity holds in both systems.
+
+The earlier separable-revelation model is a convenient special case. If each sensor independently certifies context $r$ with probability $p_{rj}$, then
 \[
-\Delta_j(S)=\sum_r w_r(1-q_r)p_{rj}
-\prod_{\ell\in S}(1-p_{r\ell}),
+F(S)=\sum_r w_r(1-q_r)
+\left[1-\prod_{j\in S}(1-p_{rj})\right].
 \]
-which is nonnegative and decreases as $S$ grows. The guarantee follows from \citet{NemhauserEtAl1978}. Deterministic coverage is the special case $p_{rj}\in\{0,1\}$, so Theorems~\ref{thm:hard} and \ref{thm:submod} identify a tight familiar regime: the problem remains NP-hard, but greedy is essentially the best possible polynomial-time approximation.
+Deterministic coverage has $p_{rj}\in\{0,1\}$, so Theorems~\ref{thm:hard} and \ref{thm:certificates} identify a tight familiar regime: optimization is NP-hard, but the $1-1/e$ approximation is essentially best possible.
 
 Outside this substitutes structure, even value-aware greedy can fail arbitrarily badly. Mix a parity task of probability $1-\delta$ with a one-feature distractor task of probability $\delta$ and give budget two. The two parity features have zero singleton gain, so greedy first selects the distractor and can no longer complete the pair. Greedy and optimal gains are $\delta/2$ and $(1-\delta)/2$, giving ratio $\delta/(1-\delta)\to0$.
 
@@ -219,12 +223,12 @@ Outside this substitutes structure, even value-aware greedy can fail arbitrarily
 Setting & Feature interaction & Algorithmic consequence \\
 \midrule
 Arbitrary BPOD & Any monotone access pattern & NP-hard; greedy ratio may vanish \\
-Separable revelation & Redundant routes to one target & Submodular; $1-1/e$ greedy \\
-Deterministic coverage & Public certificates cover contexts & NP-hard with tight threshold \\
+Public certificates & Correlated redundant evidence & Submodular; $1-1/e$ approximation \\
+Deterministic coverage & Certificates cover contexts & NP-hard with tight threshold \\
 Finite explicit game & Information cells listed exactly & Exact joint MILP \\
 \bottomrule
 \end{tabular}
-\caption{The structural landscape. The positive guarantee follows from redundant ``OR'' evidence; the negative examples use complementary ``AND'' dependencies.}
+\caption{The structural landscape. The positive guarantee follows from redundant ``OR'' evidence, even when its availability is correlated; the negative examples use complementary ``AND'' dependencies.}
 \label{tab:landscape}
 \end{table}
 
@@ -232,16 +236,26 @@ Finite explicit game & Information cells listed exactly & Exact joint MILP \\
 \centering
 \includegraphics[width=.48\textwidth]{greedy_failure.pdf}\hfill
 \includegraphics[width=.48\textwidth]{revelation_coverage.pdf}
-\caption{\textbf{Structure determines algorithmic behavior.} Left: marginal-value greedy has vanishing normalized gain when useful features are complementary. Right: on 250 separable-revelation games with twelve sensors and budget four, greedy is near optimal and remains above the $1-1/e$ guarantee.}
+\caption{\textbf{Structure determines algorithmic behavior.} Left: marginal-value greedy has vanishing normalized gain when useful features are complementary. Right: on 250 independent-revelation games with twelve sensors and budget four, greedy is near optimal and remains above the $1-1/e$ guarantee.}
 \label{fig:algorithms}
 \end{figure*}
 
 \section{Experiments}
 
-All experiments are exact, CPU-only, and regenerated by one fixed-seed script. SciPy's HiGHS backend solves the MILPs. Unit tests verify the analytic constructions, policy nonanticipativity, and agreement between the joint MILP and exhaustive feature-set optimization. We ask three questions: Do the separations appear at finite scale? Does greedy work when the theorem predicts substitutes? Do information-only criteria fail in a semantically meaningful team problem?
+All experiments are exact, CPU-only, and regenerated by fixed-seed scripts. SciPy's HiGHS backend solves the MILPs. Unit tests verify the analytic constructions, policy nonanticipativity, submodularity of correlated certificates, and agreement between the joint MILP and exhaustive feature-set optimization. We ask four questions: Do the separations appear at finite scale? Does greedy work when the theorem predicts substitutes? What is lost by ignoring correlated sensor failures? Do information-only criteria fail in a semantically meaningful team problem?
 
-\paragraph{Separable revelation.}
+\paragraph{Independent revelation.}
 We generate \NumCoverageInstances{} instances with eight contexts, twelve sensors, and budget four. Context weights are Dirichlet, baseline success lies in $[0.45,0.72]$, and overlapping sensor reliabilities lie in $[0.45,0.98]$. We compare marginal-value greedy, nonadaptive singleton ranking, and random feasible sets with exhaustive optimum. Greedy achieves mean normalized gain \CoverageGreedyMean{} and minimum \CoverageGreedyMin{}; singleton ranking achieves \CoverageSingletonMean{} and random selection \CoverageRandomMean{}.
+
+\paragraph{Shared failure modes.}
+We generate \NumCorrelatedInstances{} public-certificate instances with eight contexts, twelve sensors, three shared failure domains, and budget four. One domain has high-quality local detectors but substantial common-mode downtime; the other domains are more reliable but individually weaker. We compare correlation-aware greedy with a misspecified greedy rule that preserves each sensor's marginal certificate probability but treats sensors as independent. The aware rule attains mean ratio \CorrelatedAwareMean{} and minimum \CorrelatedAwareMin{}, whereas the independence model attains \CorrelatedIndependenceMean{} on average and falls to \CorrelatedIndependenceMin{}. The mechanism is visible in Figure~\ref{fig:correlated}: aware greedy represents \CorrelatedAwareDomains{} failure domains on average, versus only \CorrelatedIndependenceDomains{} under the independence surrogate.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=.94\textwidth]{correlated_certificates.pdf}
+\caption{\textbf{Correlations matter even when submodularity survives.} Left: normalized gain under the true shared-failure model. Correlation-aware greedy is near exact; a marginally matched independence surrogate over-selects sensors exposed to the same outage. Right: the aware rule diversifies across all three failure domains. Error bars are standard errors.}
+\label{fig:correlated}
+\end{figure*}
 
 \paragraph{Emergency response.}
 Two responders choose between sites A and B. Each privately observes severity at one site. A mild incident needs one responder; a rare severe incident needs both and has larger payoff. Candidate public fields include severe-incident alarms, a both-mild indicator, severity parity, and site-incident flags. The primary benchmark has \emph{no payoff-irrelevant latent variable}: every feature is a deterministic statistic of incident severity. Priors and rewards vary over \NumEmergencyInstances{} instances, and the designer selects one unit-cost field.
@@ -252,18 +266,22 @@ $\bar I_j(S)=\frac1n\sum_i I(\Theta;\phi_j\mid O_i,Z_S)$, and a random singleton
 \begin{table}[t]
 \centering
 \small
-\begin{tabular}{lcc}
+\begingroup
+\setlength{\tabcolsep}{3.2pt}
+\begin{tabular}{@{}lccc@{}}
 \toprule
-Method & Revelation & Emergency \\
+Method & Indep. & Correlated & Emergency \\
 \midrule
-Value greedy & \CoverageGreedyMean{} & \EmergencyGreedyMean{} \\
-Singleton/value ranking & \CoverageSingletonMean{} & -- \\
-Mutual information & -- & \EmergencyMIMean{} \\
-Private-cond. MI & -- & \EmergencyCMIMean{} \\
-Random & \CoverageRandomMean{} & \EmergencyRandomMean{} \\
+Value-aware greedy & \CoverageGreedyMean{} & \CorrelatedAwareMean{} & \EmergencyGreedyMean{} \\
+Independence-model greedy & -- & \CorrelatedIndependenceMean{} & -- \\
+Singleton/value ranking & \CoverageSingletonMean{} & \CorrelatedSingletonMean{} & -- \\
+Mutual information & -- & -- & \EmergencyMIMean{} \\
+Private-cond. MI & -- & -- & \EmergencyCMIMean{} \\
+Random & \CoverageRandomMean{} & \CorrelatedRandomMean{} & \EmergencyRandomMean{} \\
 \bottomrule
 \end{tabular}
-\caption{Mean fraction of optimal coordination gain. Revelation contains 250 random instances; emergency response contains 40 operational-only instances.}
+\endgroup
+\caption{Mean fraction of optimal coordination gain. Each sensor suite has 250 instances; emergency response has 40 operational-only instances.}
 \label{tab:results}
 \end{table}
 
@@ -284,7 +302,10 @@ On weighted coverage games with budget $m/2$, the joint MILP and direct subset e
 A public-interface audit should first identify the smallest payoff-relevant variable on which the team convention must depend. In emergency response, the central question is not whether every detail of both incidents is reconstructed; it is whether both responders know when the default split assignment should be replaced by double-teaming. Selecting features to predict the entire state can spend budget on frequent distinctions that never change this choice.
 
 \paragraph{Test for bundles before trusting greedy.}
-Singleton gains are informative only when observations act as substitutes. A simple diagnostic is to enumerate small pairs or triples and compare their joint gain with the sum of their singleton gains. Large positive interaction indicates an access-code or parity-like dependency: no member of the bundle is useful alone, so myopic selection may miss it. When multiple sensors independently certify the same sufficient conclusion, by contrast, diminishing returns is plausible and the revelation theorem supports greedy selection.
+Singleton gains are informative only when observations act as substitutes. A simple diagnostic is to enumerate small pairs or triples and compare their joint gain with the sum of their singleton gains. Large positive interaction indicates an access-code or parity-like dependency: no member of the bundle is useful alone, so myopic selection may miss it. When multiple sensors can each certify the same sufficient conclusion, the certificate theorem supports diminishing returns even if their failures are correlated.
+
+\paragraph{Model shared failure domains, not only marginal accuracy.}
+Two sensors with the same marginal reliability may be poor complements if both depend on one power supply, network link, calibration source, or upstream model. An independence surrogate counts their evidence twice and can fill the public interface with features that fail together. Scenario-level certificate sets offer a simple correction: evaluate whether a selected set intersects the available certificates in each joint failure outcome. The objective remains submodular, but its marginal gains now reward diversification.
 
 \paragraph{Do not treat public and replicated private channels as interchangeable.}
 A synchronized alarm, signed bulletin, or shared status light supplies a common decision index. Sending equally accurate but independently corrupted messages need not do so. Theorem~\ref{thm:publicprivate} therefore identifies a coordination benefit that should be evaluated separately from ordinary per-recipient accuracy. This benefit must, of course, be balanced against privacy, exposure, and access-control costs that are outside the present objective.
@@ -296,8 +317,10 @@ For a larger system, one can discretize representative states, solve the exact m
 
 BPOD separates descriptive information from coordination-enabling information. A useful public feature need not explain much of the full state; it must distinguish states in which the team should adopt different compatible actions. Conversely, a highly informative field can be redundant with private observations or can partition states that share the same optimal convention. The common-knowledge theorem makes a separate point: even when each recipient's marginal channel is fixed, replacing one public realization with independent private copies can destroy the common decision index.
 
-The access-structure theorem provides a practical diagnostic. When small feature bundles have joint gain far above the sum of their singleton gains, the design contains complementarity and greedy selection is unsafe. When sensors are redundant certificates for the same sufficient conclusion, coverage-style optimization is justified. The exact MILP can serve as a design oracle on discretized representative games, quantify heuristic optimality gaps, and reveal features whose value appears only after the team changes convention.
+The access-structure theorem and certificate theorem mark two ends of a structural spectrum. When small feature bundles have joint gain far above the sum of their singleton gains, the design contains complementarity and greedy selection is unsafe. When individual observations are redundant public certificates, expected coverage is submodular even under common-mode failures. Correlation therefore does not itself destroy the guarantee; what matters is whether success is an ``OR'' of individually decisive certificates or an ``AND'' of complementary fragments.
 
-The model is finite and one-shot, assumes aligned utilities, a known prior, honest identical broadcast, and common knowledge of the interface. It omits strategic reporting, privacy leakage, adversarial channel failures, endogenous communication, and sequential belief updates. Extending public-feature design to Dec-POMDPs or common-information coordinators would trade immediate sensing cost against future common beliefs; robust and privacy-aware design would introduce additional objectives and constraints.
+The exact MILP can serve as a design oracle on discretized representative games, quantify heuristic optimality gaps, and reveal features whose value appears only after the team changes convention. For larger certificate systems, scenario sampling and standard submodular optimization provide scalable alternatives, including cost-aware algorithms under a knapsack budget.
 
-We have formalized the upstream problem of choosing what cooperative agents should observe in common. In general the value function can realize arbitrary monotone complementarity, information-only scores can be valueless, and optimization is hard. Nevertheless, exact finite optimization is possible and a natural revelation class admits a tight greedy guarantee. The resulting design principle is simple: make public the distinctions on which compatible action should depend.
+The model is finite and one-shot, assumes aligned utilities, a known prior, honest identical broadcast, and common knowledge of the interface. It omits strategic reporting, privacy leakage, adversarial channel manipulation, endogenous communication, and sequential belief updates. The certificate class also assumes that one realized feature is individually decision-sufficient; correlations are unrestricted, but complementary partial certificates fall outside the positive theorem. Extending public-feature design to Dec-POMDPs or common-information coordinators would trade immediate sensing cost against future common beliefs; robust and privacy-aware design would introduce additional objectives and constraints.
+
+We have formalized the upstream problem of choosing what cooperative agents should observe in common. In general the value function can realize arbitrary monotone complementarity, information-only scores can be valueless, and optimization is hard. Nevertheless, exact finite optimization is possible, and a broad correlated-certificate class admits tight submodular guarantees. The resulting design principle is simple: make public the distinctions on which compatible action should depend, and account for which observations fail together.
