@@ -37,6 +37,9 @@ jobs:
           actual="$(sha256sum /tmp/correlated-extension.tar.gz | awk '{print $1}')"
           test "$actual" = "$expected"
           tar -xzf /tmp/correlated-extension.tar.gz
+          # GITHUB_TOKEN cannot rewrite workflow files. Preserve permanent CI
+          # here and update it separately through the GitHub connector.
+          git checkout HEAD -- .github/workflows/tests.yml
           rm -rf .bootstrap_extension
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
