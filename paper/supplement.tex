@@ -1,0 +1,198 @@
+\documentclass[11pt]{article}
+\usepackage[letterpaper,margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{newtxtext}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage[hyphens]{url}
+\urlstyle{rm}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newcommand{\ind}{\mathbf{1}}
+\newcommand{\calC}{\mathcal{C}}
+\newcommand{\calA}{\mathcal{A}}
+\title{Supplementary Material for\\Designing Common Knowledge}
+\author{Anonymous Authors}
+\date{}
+\begin{document}
+\maketitle
+
+\section{Full Model}
+There are agents $i\in[n]$, a finite state space $\Theta$, prior $\mu\in\Delta(\Theta)$, finite action sets $\calA_i$, private observations $o_i:\Theta\to\mathcal O_i$, and common utility $u:\Theta\times\prod_i\calA_i\to\mathbb R$. Candidate public features are deterministic maps $\phi_j:\Theta\to\mathcal Z_j$ with costs $c_j>0$. A design $S\subseteq[m]$ is feasible when $\sum_{j\in S}c_j\le B$. All agents observe the joint public signal $z_S(\theta)=(\phi_j(\theta))_{j\in S}$ and know that every agent observes it. For a behavioral profile $\boldsymbol\pi$, the value is
+\[
+J(S,\boldsymbol\pi)=\sum_{\theta}\mu(\theta)
+ \sum_{\mathbf a}u(\theta,\mathbf a)
+ \prod_i\pi_i(a_i\mid o_i(\theta),z_S(\theta)).
+\]
+We write $V(S)=\max_{\boldsymbol\pi}J(S,\boldsymbol\pi)$ and $F(S)=V(S)-V(\varnothing)$.
+
+\section{Structural Results}
+
+\begin{lemma}[Deterministic policies suffice]\label{lem:det}
+For every fixed public feature set $S$, there is an optimal deterministic decentralized policy profile.
+\end{lemma}
+\begin{proof}
+For each agent $i$ and each information cell $h=(o_i,z_S)$, let $p_{i,h}\in\Delta(\calA_i)$ denote the local action distribution. The objective $J$ is multilinear in the finite collection $\{p_{i,h}\}$. Fix all variables except one $p_{i,h}$. The remaining objective is linear over a simplex, so it attains a maximum at a vertex, i.e., at a deterministic action. Replace that cell by such a maximizer and continue over all cells. Each replacement weakly increases the objective; after finitely many replacements every cell is deterministic. Therefore a deterministic profile attains the optimum. 
+\end{proof}
+
+\begin{lemma}[Monotonicity]\label{lem:mono}
+If $S\subseteq T$, then $V(S)\le V(T)$.
+\end{lemma}
+\begin{proof}
+Given any policy for $S$, define a policy for $T$ that discards the coordinates indexed by $T\setminus S$. It induces the same state-contingent action distribution and value. Maximizing over policies for $T$ proves the claim.
+\end{proof}
+
+\subsection{Parity and arbitrary access structures}
+The two-bit parity example has $V(\varnothing)=V(\{1\})=V(\{2\})=1/2$ and $V(\{1,2\})=1$, directly violating submodularity. The next result shows that arbitrary higher-order complementarity is possible.
+
+\begin{theorem}[Access-structure expressivity]\label{thm:access-supp}
+Let $\calC\subseteq 2^{[m]}$ be upward closed and satisfy $\varnothing\notin\calC$. There is a two-agent, two-action BPOD instance for which
+\[
+V(S)=\begin{cases}1,&S\in\calC,\\[2pt]1/2,&S\notin\calC.\end{cases}
+\]
+\end{theorem}
+\begin{proof}
+Let $E_1,\ldots,E_L$ be the inclusion-minimal members of $\calC$, and let $X\sim\mathrm{Bernoulli}(1/2)$ be the target action. For every $\ell$, fix an ordering $E_\ell=\{j_{\ell,1},\ldots,j_{\ell,r_\ell}\}$. Independently across $\ell$, draw fair bits $R_{\ell,1},\ldots,R_{\ell,r_\ell-1}$ and set
+\[
+R_{\ell,r_\ell}=X\oplus R_{\ell,1}\oplus\cdots\oplus R_{\ell,r_\ell-1}.
+\]
+Feature $j$ reports the tuple of all shares $R_{\ell,t}$ for which $j=j_{\ell,t}$. The full state is $\theta=(X,R)$; agents have no private observations and receive utility one exactly when both output $X$.
+
+If $S\in\calC$, then $S$ contains some minimal set $E_\ell$. Its selected features contain every share in block $\ell$, so the public signal reconstructs $X$ by XOR. Hence $V(S)=1$.
+
+Now suppose $S\notin\calC$. Then every block $E_\ell$ has at least one unselected share. We show that the selected shares in block $\ell$ are independent of $X$. Conditional on any $X=x$ and any assignment to the selected shares, choose one missing share freely and then choose the last missing share to satisfy the XOR constraint (with the obvious one-missing-share specialization). The number of completions is the same for $x=0$ and $x=1$, so the selected block view has identical conditional distribution under both target values. Because the random masks are independent across blocks conditional on $X$, the concatenated public view is also independent of $X$. Thus no policy can predict $X$ above chance, and the constant convention attains $1/2$. 
+\end{proof}
+
+\subsection{Public versus independent private channels}
+\begin{theorem}[Common-knowledge advantage]\label{thm:public-private-supp}
+Let $X$ be uniform on $\{0,1\}$, let $0\le\epsilon\le1/2$, and let the team earn one iff all $n$ agents output $X$. If all agents observe the same output of a binary symmetric channel with crossover $\epsilon$, then $V_{\mathrm{pub}}=1-\epsilon$. If they instead receive conditionally independent outputs of the same channel, then
+\[
+V_{\mathrm{priv}}=\max\{1/2,(1-\epsilon)^n\}.
+\]
+Every individual signal has mutual information $1-h_2(\epsilon)$ with $X$.
+\end{theorem}
+\begin{proof}
+The information identity is the standard entropy calculation for a binary symmetric channel. By Lemma~\ref{lem:det}, restrict attention to deterministic local rules. A deterministic map from one bit to one bit is one of four types: constant zero, constant one, identity, or complement.
+
+For the public channel, if agents use different nonconstant maps, or different constants, they cannot all be correct on the same realization. A common identity rule succeeds with probability $1-\epsilon$, a common complement rule with probability $\epsilon$, and either common constant with probability $1/2$. Since $\epsilon\le1/2$, identity is optimal.
+
+For independent private outputs, any profile containing a constant rule can succeed for at most one value of $X$; conditional success is at most one in that state and zero in the other, giving total value at most $1/2$. If no rule is constant, let $r$ agents use identity and $n-r$ use complement. Conditional on either target value, all agents are correct with probability $(1-\epsilon)^r\epsilon^{n-r}$. Since $1-\epsilon\ge\epsilon$, this is maximized at $r=n$, yielding $(1-\epsilon)^n$. The all-constant and all-identity profiles attain the two upper bounds.
+\end{proof}
+
+\begin{proposition}[Mutual-information decoy]\label{prop:decoy-supp}
+There is a two-feature, unit-budget instance in which selecting the feature with larger mutual information yields zero normalized coordination gain, whereas the other feature yields perfect coordination.
+\end{proposition}
+\begin{proof}
+Draw independent $T\sim\mathrm{Bernoulli}(p)$ with $0<p<1/2$ and $N\sim\mathrm{Bernoulli}(1/2)$. The agents must both output $T$ and have no private observations. One feature reports $N$ and the other reports $T$. Measured against the full state, $I((T,N);N)=1$ while $I((T,N);T)=h_2(p)<1$. The information rule selects $N$, which is independent of the payoff target and leaves value at the constant-action baseline $1-p$. Revealing $T$ gives value one, so the information rule's normalized gain is zero.
+\end{proof}
+
+\section{Complexity and Algorithms}
+\begin{theorem}[Hardness and approximation threshold]\label{thm:hard-supp}
+BPOD is NP-hard even for two agents, binary actions, deterministic public features, unit costs, and a common payoff. For normalized gain and a cardinality budget, a polynomial-time approximation ratio exceeding $1-1/e$ by any fixed constant would imply $P=NP$.
+\end{theorem}
+\begin{proof}
+Reduce weighted Max $k$-Coverage. Let contexts be universe elements $r$ with nonnegative weights $w_r$ summing to one. Both agents observe $r$. Independently draw a fair target bit $B$. For each set $C_j$, feature $j$ reports $B$ when $r\in C_j$ and an erasure otherwise. The agents receive utility one iff both output $B$.
+
+For selected features $S$, the target is public exactly in contexts covered by $\cup_{j\in S}C_j$. In a covered context value is one; otherwise the fair bit is hidden and value is $1/2$. Therefore
+\[
+V(S)=\frac12+\frac12\sum_{r\in\cup_{j\in S}C_j}w_r,
+\qquad
+F(S)=\frac12\sum_{r\in\cup_{j\in S}C_j}w_r.
+\]
+Thus maximizing $F$ under $|S|\le k$ is exactly weighted Max $k$-Coverage. NP-hardness and Feige's approximation threshold transfer directly \cite{Feige1998}.
+\end{proof}
+
+\subsection{Exact joint feature-policy MILP}
+Introduce binary variables $x_j$, $y_{i\theta a}$, and $q_{\theta\mathbf a}$, indicating selected features, state-indexed local actions, and state-indexed joint actions. The formulation is
+\begin{align*}
+\max\;&\sum_{\theta,\mathbf a}\mu(\theta)u(\theta,\mathbf a)q_{\theta\mathbf a}\\
+\text{s.t. }&\sum_jc_jx_j\le B,\\
+&\sum_a y_{i\theta a}=1 &&\forall i,\theta,\\
+&\sum_{\mathbf a}q_{\theta\mathbf a}=1 &&\forall\theta,\\
+&q_{\theta\mathbf a}\le y_{i\theta a_i} &&\forall\theta,\mathbf a,i,\\
+&y_{i\theta a}-y_{i\theta'a}\le
+ \sum_{j:\phi_j(\theta)\ne\phi_j(\theta')}x_j
+ &&\forall i,a,\theta,\theta':o_i(\theta)=o_i(\theta'),\\
+&y_{i\theta'a}-y_{i\theta a}\le
+ \sum_{j:\phi_j(\theta)\ne\phi_j(\theta')}x_j
+ &&\forall i,a,\theta,\theta':o_i(\theta)=o_i(\theta'),\\
+&x,y,q\in\{0,1\}.
+\end{align*}
+
+\begin{theorem}[MILP exactness]\label{thm:milp-supp}
+The MILP optimum equals the optimal BPOD value.
+\end{theorem}
+\begin{proof}
+For completeness, take a feasible feature set $S$ and deterministic decentralized profile. Set $x_j=\ind\{j\in S\}$, set $y_{i\theta a}=1$ for the prescribed action in agent $i$'s information cell, and set $q_{\theta\mathbf a}=1$ for the induced joint action. If $o_i(\theta)=o_i(\theta')$ and no selected feature separates the two states, decentralization requires the same action, so both nonanticipativity inequalities hold with right side zero. If some selected feature separates them, the right side is at least one, which dominates the difference of binary variables. All remaining constraints and the objective are immediate.
+
+For soundness, let $(x,y,q)$ be a feasible integer solution and define $S=\{j:x_j=1\}$. Suppose states $\theta,\theta'$ yield the same private observation for agent $i$ and the same selected public signal. Then every selected feature agrees, so the right side of both nonanticipativity inequalities is zero. Hence $y_{i\theta a}=y_{i\theta'a}$ for all actions. The one-action constraints therefore define a deterministic action on every private-public information cell. The $q$ constraints and $\sum_{\mathbf a}q_{\theta\mathbf a}=1$ select exactly the joint action induced by those local actions. Thus the solution corresponds to a feasible decentralized policy with identical objective. Lemma~\ref{lem:det} shows no randomized policy can do better.
+\end{proof}
+
+\section{Separable Revelation and Greedy}
+\begin{theorem}[Submodular revelation]\label{thm:submod-supp}
+In context $r$ with probability $w_r$, suppose baseline success is $q_r$ and selected sensor $j$ independently reveals the correct target with probability $p_{rj}$. If one successful revelation suffices, then
+\[
+F(S)=\sum_r w_r(1-q_r)\left[1-\prod_{j\in S}(1-p_{rj})\right]
+\]
+is normalized, monotone, and submodular. Cardinality-budget marginal-value greedy attains at least $(1-1/e)F(S^\star)$.
+\end{theorem}
+\begin{proof}
+In context $r$, no selected feature reveals with probability $\prod_{j\in S}(1-p_{rj})$. Relative to the baseline, the gain is $(1-q_r)$ times the probability of at least one revelation, proving the formula. The marginal gain of adding $j\notin S$ is
+\[
+\Delta_j(S)=\sum_r w_r(1-q_r)p_{rj}\prod_{\ell\in S}(1-p_{r\ell}).
+\]
+Every term is nonnegative. If $S\subseteq T$, the product for $T$ is no larger than the product for $S$, so $\Delta_j(T)\le\Delta_j(S)$. This is diminishing returns. The greedy guarantee follows from the classical theorem of Nemhauser, Wolsey, and Fisher \cite{NemhauserEtAl1978}.
+\end{proof}
+
+\begin{theorem}[Value-greedy can be arbitrarily bad]\label{thm:greedybad-supp}
+For every $\rho>0$, there is a three-feature, budget-two BPOD instance on which marginal-value greedy obtains less than $\rho$ times optimal normalized gain.
+\end{theorem}
+\begin{proof}
+Choose $0<\delta<\rho/(1+\rho)$. A public context chooses a parity task with probability $1-\delta$ and a distractor task with probability $\delta$. In parity context, the target is the XOR of two fair bits, and features 1 and 2 reveal one bit each. In distractor context, the target is a fair bit revealed by feature 3. Agents must both output the active target. The no-feature value is $1/2$.
+
+Features 1 and 2 each have zero singleton gain, while feature 3 has gain $\delta/2$, so greedy chooses feature 3 first. With one slot left, neither parity feature adds value; greedy gain is $\delta/2$. The optimal set $\{1,2\}$ has gain $(1-\delta)/2$. Their ratio is $\delta/(1-\delta)<\rho$.
+\end{proof}
+
+\section{Experimental Details}
+All experiments run on CPU using NumPy, SciPy's HiGHS MILP interface, and Matplotlib. Fixed random seeds appear in the scripts. Unit tests compare the joint MILP against exhaustive feature-set optimization on small instances and verify all analytic values.
+
+\paragraph{Separable revelation.}
+We draw 250 instances with eight contexts, twelve candidate sensors, budget four, Dirichlet context weights, baseline success in $[0.45,0.72]$, and overlapping sensor reliabilities in $[0.45,0.98]$. Exact subset search supplies the optimum. We compare marginal-value greedy, singleton ranking, and random feasible sets.
+
+\paragraph{Emergency response.}
+Two responders choose site A or B. Each privately observes severity at one site. Mild incidents can be handled by one responder; severe incidents require both and have larger reward. The operational candidate menu contains only deterministic statistics of the payoff-relevant severity pair: two severe alarms, two incident flags, both-mild, and severity parity. For 40 randomized priors and reward scales, we choose one alarm. We compare exact value-greedy, unconditional mutual information, mean private-conditioned mutual information, and a uniformly random feature. A separate stress variant adds two independent telemetry bits to verify the analytic information-decoy failure.
+
+\paragraph{Runtime.}
+On weighted-coverage instances with up to 18 features and budget $m/2$, direct enumeration uses the closed-form value while the joint MILP optimizes features and policies simultaneously. Timings are illustrative and machine dependent; exact objective agreement is tested.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lrr}
+\toprule
+Quantity & Value & Instances \\
+\midrule
+Revelation greedy mean ratio & 0.997 & 250 \\
+Revelation greedy minimum ratio & 0.945 & 250 \\
+Emergency value-greedy mean ratio & 1.000 & 40 \\
+Emergency MI mean ratio & 0.001 & 40 \\
+Emergency private-conditioned MI & 0.000 & 40 \\
+Public/private premium ($\epsilon=.1,n=10$) & 0.400 & -- \\
+Greedy-trap ratio ($\delta=.01$) & 0.0101 & -- \\
+\bottomrule
+\end{tabular}
+\caption{Checked-in exact results. Ratios use coordination gain above the no-feature baseline.}
+\end{table}
+
+\section{Additional Scope Discussion}
+The access-structure theorem is an expressivity statement, not a claim that engineered sensor suites are adversarial secret-sharing schemes. Its purpose is to rule out universal low-order complementarity assumptions. Separable revelation gives one transparent sufficient substitutes condition, but it is not necessary. Broader characterizations may be formulated through informational substitutes, submodularity ratios, or domain-specific graphical structure.
+
+The one-shot model also cleanly separates public-observation design from dynamic planning. In a Dec-POMDP extension, the designer would choose public channels that influence future common beliefs as well as immediate action. Robust and privacy-aware variants would replace expected value by an ambiguity-set or constrained objective. Strategic agents would introduce obedience and incentive constraints, moving the problem toward Bayesian persuasion and mechanism design.
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+\end{document}

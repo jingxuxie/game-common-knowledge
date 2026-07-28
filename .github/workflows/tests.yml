@@ -1,0 +1,72 @@
+name: tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  exact-artifact:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install -e . --no-build-isolation
+
+      - name: Unit tests
+        run: pytest -q
+
+      - name: Reproduce experiments
+        run: python experiments/run_all.py
+
+      - name: Validate reported results
+        run: python scripts/validate_results.py
+
+      - name: Check generated research files
+        run: |
+          test -s results/summary.json
+          test -s figures/emergency_response.pdf
+          test -s figures/public_private_gap.pdf
+          test -s paper/generated_results.tex
+
+      - name: Install document tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y texlive-latex-base texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra texlive-bibtex-extra poppler-utils
+
+      - name: Build preprint and supplement
+        run: make paper
+
+      - name: Validate manuscript PDFs
+        run: |
+          test "$(pdfinfo paper/preprint.pdf | awk '/^Pages:/ {print $2}')" = "8"
+          test "$(pdfinfo paper/supplement.pdf | awk '/^Pages:/ {print $2}')" = "5"
+          if pdffonts paper/preprint.pdf | grep -q "Type 3"; then exit 1; fi
+          if pdffonts paper/supplement.pdf | grep -q "Type 3"; then exit 1; fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: common-knowledge-artifact
+          path: |
+            results/
+            figures/
+            paper/generated_results.tex
+            paper/preprint.pdf
+            paper/supplement.pdf
