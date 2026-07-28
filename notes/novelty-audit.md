@@ -20,13 +20,17 @@ The distinct package here is:
 2. heterogeneous private observations remain, and each selected realization refines every agent's information partition simultaneously;
 3. every finite monotone access structure is realized as a coordination-value threshold;
 4. public and independent private channels are separated at equal per-agent mutual information;
-5. hardness, an exact feature-policy MILP, an arbitrarily bad greedy family, and a positive submodular class are treated in one finite model.
+5. hardness, an exact feature-policy MILP, an arbitrarily bad greedy family, and a positive certificate class are treated in one finite model.
 
-## 3. Value of information and sensor selection
+## 3. Value of information, coverage, and sensor selection
 
-Blackwell comparison, informational substitutes, Gaussian-process sensor placement, and adaptive submodularity provide powerful conditions under which information acquisition can be ordered or optimized (Blackwell 1953; Chen and Waggoner 2016; Krause and Guestrin 2005; Krause, Singh, and Guestrin 2008; Golovin and Krause 2011).
+Blackwell comparison, informational substitutes, Gaussian-process sensor placement, outbreak detection, adaptive submodularity, and submodular POMDP sensing provide conditions under which information acquisition or coverage objectives can be optimized (Blackwell 1953; Chen and Waggoner 2016; Krause and Guestrin 2005; Krause, Singh, and Guestrin 2008; Leskovec et al. 2007; Golovin and Krause 2011; Satsangi et al. 2015).
 
 Our mutual-information counterexample is not a claim that mutual information is generally inappropriate. It proves that a statistic of latent-state uncertainty has no universal guarantee for the **optimized value of decentralized joint action**. The operational emergency benchmark strengthens this point by using only features derived from payoff-relevant incident variables.
+
+Expected coverage under scenarios is a classical submodular construction. The correlated public-certificate theorem should therefore **not** be described as inventing correlated coverage. Its contribution is to identify a decision-sufficient public-certificate condition inside BPOD and prove that the optimized decentralized team value reduces to expected coverage. This makes explicit that arbitrary correlation among certificate events does not invalidate submodularity. The knapsack `1-1/e` consequence uses Sviridenko (2004), not ordinary ratio-greedy.
+
+The shared-failure experiment contributes a modeling lesson rather than a new approximation theorem: preserving every sensor's marginal success probability while discarding shared outages can materially change the selected public interface and its true coordination value.
 
 ## 4. Cooperative AI and zero-shot coordination
 
@@ -48,7 +52,8 @@ Ito, Saito, and Nishizeki (1989) and the subsequent secret-sharing literature sh
 - “Every finite monotone access structure is realizable as a coordination-value threshold.”
 - “A public channel and independent private copies can have equal per-agent mutual information but different optimal team value.”
 - “State mutual information and marginal-value greedy have no general approximation guarantee for BPOD.”
-- “Separable revelation yields a monotone-submodular subclass with a tight classical greedy guarantee.”
+- “Decision-sufficient public certificates yield a monotone-submodular subclass under arbitrary correlation.”
+- “Equal marginal sensor quality does not determine redundancy or public-interface value.”
 - “The joint feature-policy MILP is exact for finite instances.”
 
 ## Claim language to avoid
@@ -57,6 +62,8 @@ Ito, Saito, and Nishizeki (1989) and the subsequent secret-sharing literature sh
 - “The first demonstration that common knowledge matters for coordination.”
 - “Mutual information is always a bad public-feature objective.”
 - “The access-structure construction is a new secret-sharing result.”
+- “Correlated expected coverage is a new submodularity theorem.”
+- “Ordinary greedy achieves `1-1/e` for arbitrary feature costs.”
 - “The exact MILP scales to large Dec-POMDPs.”
 
 ## Final archival search checklist
@@ -67,7 +74,8 @@ Before archival submission, repeat searches for:
 - common observation design Dec-POMDP;
 - shared interface design multi-agent coordination;
 - state-feature publicization common-payoff game;
+- correlated sensor selection common-mode failure;
 - secret sharing value of information team decision;
 - optimal common-information acquisition.
 
-A contemporaneous paper defining the same feature-menu problem should be cited and the formulation-level novelty narrowed. The access-structure theorem, equal-information separation, and exact finite optimization would remain the main differentiators.
+A contemporaneous paper defining the same feature-menu problem should be cited and the formulation-level novelty narrowed. The access-structure theorem, equal-information separation, exact finite optimization, and public-certificate mapping would remain the main differentiators.

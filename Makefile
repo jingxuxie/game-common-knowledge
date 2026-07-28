@@ -11,9 +11,11 @@ test:
 
 experiments:
 	PYTHONPATH=src $(PYTHON) experiments/run_all.py
+	PYTHONPATH=src $(PYTHON) experiments/run_correlated_certificates.py
 
 validate: experiments
 	PYTHONPATH=src $(PYTHON) scripts/validate_results.py
+	PYTHONPATH=src $(PYTHON) scripts/validate_correlated_results.py
 
 paper: validate
 	cd paper && $(PDFLATEX) $(LATEXFLAGS) preprint.tex

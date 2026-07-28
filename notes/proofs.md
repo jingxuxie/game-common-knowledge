@@ -1,6 +1,6 @@
 # Proof ledger
 
-This document records the complete theorem statements and proof dependencies used by the paper.  The LaTeX supplement contains the polished versions.
+This document records the complete theorem statements and proof dependencies used by the paper. The LaTeX supplement contains the polished versions.
 
 ## Model
 
@@ -54,105 +54,86 @@ R_1,...,R_{r-1}, X XOR R_1 XOR ... XOR R_{r-1}
 
 to the features in `E_l`. Feature `j` broadcasts every share assigned to `j` across all blocks. Both agents receive utility one iff both output `X`.
 
-**Authorized sets.** If `S` contains a minimal authorized edge, its shares XOR to `X`, hence value one is attainable.
-
-**Unauthorized sets.** If `S` contains no minimal edge, then at least one share is absent from every block. In one XOR block, every strict subset of shares is uniform and independent of `X`; this follows by using a missing fair share to biject the completions for `X=0` and `X=1`. The blocks use independent randomness, so their collected partial views are jointly independent of `X`. The best team decision therefore succeeds with probability one half. `QED`
-
-**Consequence.** Public-observation value can exhibit complementarity of any order and any finite monotone Boolean authorization pattern. This is stronger than a single non-submodular counterexample and explains why unrestricted instances admit no universal diminishing-returns argument.
+If `S` contains a minimal authorized edge, its shares reconstruct `X`. If it contains no minimal edge, every block has a missing fair share; partial views have identical distributions under `X=0` and `X=1`, including jointly across independent blocks. Thus unauthorized sets cannot beat chance. `QED`
 
 ## Theorem 5: equal marginal information, unequal coordination value
 
-Let `X` be a uniform bit and `epsilon in [0,1/2]`.
-
-- In the **public** experiment, every agent sees the same output `Z` of a binary symmetric channel with crossover `epsilon`.
-- In the **private** experiment, agent `i` sees an independent output `Y_i` of the same channel, conditionally independent given `X`.
-
-The team receives one iff all `n` agents output `X`.
-
-**Statement.**
+Let `X` be uniform and let all marginal channels be binary symmetric with crossover `epsilon in [0,1/2]`. One experiment sends the same channel output to all agents; the other sends conditionally independent copies. If the team succeeds only when all `n` agents output `X`, then
 
 ```text
 V_public = 1-epsilon,
 V_private = max{1/2, (1-epsilon)^n},
-I(X;Z)=I(X;Y_i)=1-h_2(epsilon) for every i.
+I(X;Z)=I(X;Y_i)=1-h_2(epsilon).
 ```
 
-**Public proof.** All agents use the identity rule and succeed with probability `1-epsilon`. For a binary signal, the only deterministic rules are constant zero, constant one, identity, and complement, with success `1/2,1/2,1-epsilon,epsilon`; deterministic sufficiency proves optimality.
-
-**Private proof.** Every deterministic local rule is one of the same four. If at least one agent is constant, simultaneous correctness occurs for at most one value of `X`, hence with probability at most one half. If no agent is constant, suppose `r` agents use identity and the rest use complement. Conditional on either state, simultaneous correctness has probability `(1-epsilon)^r epsilon^(n-r)`, maximized at `r=n`. The all-constant and all-identity profiles attain the two terms. `QED`
-
-At `epsilon=0.1,n=10`, the values are `0.9` and `0.5`, a common-knowledge premium of `0.4` despite equal information for each individual agent.
+Deterministic sufficiency reduces every local binary rule to constant zero, constant one, identity, or complement. The public identity convention succeeds with `1-epsilon`. In the private case, any constant-containing profile is at most `1/2`, while all nonconstant profiles have success `(1-epsilon)^r epsilon^(n-r)`, maximized when every agent uses identity. `QED`
 
 ## Proposition 6: a mutual-information decoy
 
-Draw independent `T~Bernoulli(p)` with `0<p<1/2` and `N~Bernoulli(1/2)`. Both agents must output `T`; they have no private observations. The two candidate features reveal `N` and `T`, and the budget is one.
+Draw independent `T~Bernoulli(p)` with `0<p<1/2` and `N~Bernoulli(1/2)`. Both agents must output `T`. The two candidate features reveal `N` and `T`, and the budget is one. Although
 
 ```text
-I((T,N);N)=1 > h_2(p)=I((T,N);T).
+I((T,N);N)=1 > h_2(p)=I((T,N);T),
 ```
 
-Hence an unconditional mutual-information rule selects `N`. It leaves value at the no-feature baseline `1-p`, while publicizing `T` gives value one. The information rule's normalized coordination gain is zero.
+the nuisance feature has zero normalized coordination gain while revealing `T` gives perfect coordination.
 
 ## Theorem 7: NP-hardness and approximation threshold
 
-Reduce weighted Max `k`-Coverage. Context `r` has normalized weight `w_r` and is observed by both agents. Independently draw a fair target bit `B`. Feature `j` outputs `B` in contexts belonging to set `C_j` and an erasure otherwise. Both agents must output `B`.
-
-For selected set `S`, covered contexts reveal `B` perfectly and uncovered contexts retain value one half, so
+Reduce weighted Max `k`-Coverage. Public context `r` has normalized weight `w_r`, and a fair target bit is hidden. Feature `j` reveals the bit in contexts in `C_j` and reports an erasure otherwise. Then
 
 ```text
 V(S)=1/2 + (1/2) sum_{r in union_{j in S} C_j} w_r.
 ```
 
-Thus maximizing normalized gain is exactly weighted Max `k`-Coverage. Selection is NP-hard even for two agents, binary actions, deterministic features, unit costs, and common payoff. Feige's threshold transfers: unless `P=NP`, no polynomial algorithm guarantees `1-1/e+eta` for every fixed `eta>0` on normalized gain. `QED`
+Maximizing normalized gain is exactly weighted Max `k`-Coverage. NP-hardness and the `1-1/e` approximation threshold transfer. `QED`
 
-## Theorem 8: separable revelation is submodular
+## Theorem 8: exact joint feature-policy MILP
 
-In context `r` with weight `w_r`, the team succeeds with baseline probability `q_r`. Sensor `j` independently reveals the correct target with probability `p_{rj}`; success is one if at least one selected sensor reveals. Then
+Use binary variables `x_j`, `y_{i,theta,a}`, and `q_{theta,a_vector}`. The feature-controlled nonanticipativity constraints are
+
+```text
+|y_{i,theta,a}-y_{i,theta',a}|
+    <= sum_{j: phi_j(theta) != phi_j(theta')} x_j
+```
+
+whenever `o_i(theta)=o_i(theta')`. A feasible selected set and deterministic policy define a feasible integer solution. Conversely, when selected public and private observations agree in two states, the right-hand side is zero and all action indicators agree, so every integer solution induces a valid decentralized policy. Deterministic sufficiency completes exactness. `QED`
+
+## Theorem 9: correlated public certificates are submodular
+
+In public context `r`, let `C_r(omega)` be the random set of features whose realized outputs are decision-sufficient public certificates. If `S` intersects this set, the team can implement the context-optimal compatible action; otherwise it receives baseline success `q_r`. The joint law of `C_r(omega)` can be arbitrary.
+
+**Statement.**
+
+```text
+F(S)=sum_r w_r(1-q_r) E_omega[1{S intersects C_r(omega)}]
+```
+
+is normalized, monotone, and submodular.
+
+**Proof.** Fix `r` and `omega`. The indicator is a coverage function. The marginal of adding `j` is one exactly when `j` belongs to `C_r(omega)` and the current set has not already intersected it. Enlarging the current set can only change this marginal from one to zero, never the reverse. Therefore each outcome-wise function is submodular. Nonnegative weighted sums and expectations preserve submodularity. `QED`
+
+**Algorithmic consequences.** Cardinality-budget marginal-value greedy attains `1-1/e`. For arbitrary positive costs, the monotone-submodular knapsack algorithm of Sviridenko (2004) attains `1-1/e`; this is not a claim about ordinary ratio-greedy.
+
+## Proposition 10: marginal reliability does not identify redundancy
+
+For any `p in (0,1)`, consider two features with singleton certificate probability `p`.
+
+- Perfectly correlated system: both are available together with probability `p`, so pair gain is `p`.
+- Independent system: each is available independently with probability `p`, so pair gain is `1-(1-p)^2`.
+
+The singleton gains are identical, but the second feature has zero marginal gain after the first in the correlated system and positive marginal gain in the independent system. Hence per-feature accuracy or singleton value cannot identify redundancy. `QED`
+
+## Corollary 11: independent separable revelation
+
+If sensor `j` independently certifies context `r` with probability `p_{rj}`, then
 
 ```text
 F(S)=sum_r w_r(1-q_r)[1-product_{j in S}(1-p_{rj})].
 ```
 
-The marginal gain is
+This is the product-form special case of Theorem 9.
 
-```text
-Delta_j(S)=sum_r w_r(1-q_r) p_{rj} product_{l in S}(1-p_{rl}).
-```
+## Theorem 12: marginal-value greedy can be arbitrarily bad
 
-It is nonnegative and decreases as `S` grows. Therefore `F` is monotone submodular, and cardinality-budget greedy achieves `1-1/e` of optimal gain. `QED`
-
-## Theorem 9: marginal-value greedy can be arbitrarily bad
-
-With probability `1-delta`, the publicly known context is a parity task with two independent bits and two complementary features. With probability `delta`, it is a one-bit distractor task with a third feature. Budget is two.
-
-The empty-set value is one half. Each parity feature has zero initial marginal gain, while the distractor has gain `delta/2`, so greedy selects it. One remaining feature cannot solve parity, leaving total gain `delta/2`. The optimal pair consists of the parity features and has gain `(1-delta)/2`. Hence
-
-```text
-greedy gain / optimal gain = delta/(1-delta) -> 0.
-```
-
-## Theorem 10: exact MILP
-
-Use binary variables:
-
-- `x_j`: feature `j` is selected;
-- `y_{i,theta,a}`: agent `i` chooses action `a` in state `theta`;
-- `q_{theta,a_vector}`: joint action `a_vector` is taken in state `theta`.
-
-Constraints are:
-
-```text
-sum_j c_j x_j <= B,
-sum_a y_{i,theta,a}=1,
-sum_{a_vector} q_{theta,a_vector}=1,
-q_{theta,a_vector} <= y_{i,theta,a_i},
-|y_{i,theta,a}-y_{i,theta',a}|
-    <= sum_{j: phi_j(theta) != phi_j(theta')} x_j
-    whenever o_i(theta)=o_i(theta').
-```
-
-The objective is `sum_theta mu_theta sum_a u(theta,a) q_{theta,a}`.
-
-**Soundness.** A feasible integer solution induces a valid selected set and deterministic policy: if two states are indistinguishable under the selected public and private signals, the right-hand side of the nonanticipativity constraint is zero, so all action indicators agree. The `q` constraints select the induced joint action.
-
-**Completeness.** Any feasible feature set and deterministic decentralized profile define `x`, `y`, and `q` satisfying every constraint with identical objective. Deterministic sufficiency completes exactness. `QED`
+Mix a parity task of probability `1-delta` with a one-feature distractor task of probability `delta`, under budget two. Greedy first selects the distractor because both parity features have zero singleton gain; it can no longer complete the parity pair. Greedy and optimal gains are `delta/2` and `(1-delta)/2`, so their ratio `delta/(1-delta)` tends to zero. `QED`
